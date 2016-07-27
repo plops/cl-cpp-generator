@@ -1,42 +1,15 @@
-(ql:quickload :optima)
-
-(defpackage :g (:use :cl :optima))
+(defpackage :g
+  (:use :cl))
 (in-package :g)
 
 (setf (readtable-case *readtable*) :invert)
 
-(defparameter *out* *standard-output*)
-
-(defmacro w (&rest rest)
-  `(format *out* "~{~a ~}" ',rest))
-
-(defun namespace (ns &rest rest)
-  (w namespace ns { (w rest) }))
-
-(let ((N))
- (namespace N
-	    ))
 
 
 
-(emit-cpp 
- (with-namespace N
-   (function g ((a :type char)) int
-	     (return (+ 1 a)))
-   (let ((i :type int)))))
 
-
-(progn
-  (with-open-file (s "o.cpp" :direction :output :if-exists :supersede :if-does-not-exist :create)
-    (emit-cpp :str s :code
-	      '(with-compilation-unit
-		(with-namespace N
-		  (function g ((a :type char)
-			       (b :type int*)) int)))))
-  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/o.cpp")))
-
-
-
+#+nil
+(trace emit-cpp)
 
 (defun emit-cpp (&key code (str nil))
   (if code
@@ -53,5 +26,15 @@
 			  (format str "namespace ~a { ~a };~%"
 				  ns (emit-cpp :code block))))
 	(with-compilation-unit (format str "~a~%"
-				(emit-cpp :code (cdr code)))))
+				(emit-cpp :code (cadr code)))))
       ""))
+
+
+(progn
+  (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp" :direction :output :if-exists :supersede :if-does-not-exist :create)
+    (emit-cpp :str s :code
+	      '(with-compilation-unit
+		(with-namespace N
+		  (function g ((a :type char)
+			       (b :type int*)) int)))))
+  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp")))
