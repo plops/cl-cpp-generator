@@ -6,14 +6,39 @@
 
 
 ;; OOP A%3A C++-Grammatik (mit Links).html
+#|
+include arg
+ arg either keyword like <stdio.h> or a string
 
+function name params* ret expr1 expr2 ... 
+name .. function name
+parameters .. 0 or more but always a list
+ret .. return value
+
+class identifier base-clause
+identifier .. class name like dfa%%flash
+base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fcsdf) (private B::C))
+
+|#
 
 #+nil
 (trace emit-cpp)
 
 (defun lisp->c (name)
   (substitute #\_ #\-
-   (substitute #\: #\% (format nil "~a" name))))
+	      (substitute #\: #\% (format nil "~a" name))))
+
+(defun ensure-list (x)
+  "Make sure x is in a list."
+  (if (listp x)
+      x
+      (list x)))
+
+(defun emit-function-header (str name params ret)
+  (format str "~{~a~^ ~} ~a(~{~a~^,~})"
+	  (mapcar #'lisp->c (ensure-list ret))
+	  name
+	  (emit-cpp :code `(:params ,params))))
 
 (defun emit-cpp (&key code (str nil))
   (if code
@@ -21,16 +46,15 @@
 	(:params (loop for e in (cadr code) collect
 		     (destructuring-bind (name &key type) e
 		       (format str "~a ~a" type name))))
-	(include (format str "#include ~a" (cadr code)))
+	(include (format str "#include ~s" (cadr code)))
 	(function (destructuring-bind (name params ret &rest rest) (cdr code)
-		    (format str "~a ~a(~{~a~^,~}){~a}"
-			    ret name
-			    (emit-cpp :code `(:params ,params))
-			    (emit-cpp :code rest))))
+		    (concatenate 'string
+				 (emit-function-header str name params ret)
+				 (format str "{~a~%}~%"  (emit-cpp :code rest)))))
 	(functiond (destructuring-bind (name params ret) (cdr code)
-		    (format str "~a ~a(~{~a~^,~});"
-			    ret name
-			    (emit-cpp :code `(:params ,params)))))
+		     (concatenate 'string
+				  (emit-function-header str name params ret)
+				  ";")))
 	(access-specifier (format str "~a:~%" (cadr code))
 			  ;; public, private or protected
 			  )
@@ -43,12 +67,26 @@
 		   (format s "{~{~a~%~}~%}~%" (loop for e in member-specification collect
 						 (emit-cpp :code e))))))
 	(with-namespace (destructuring-bind (ns &rest block) (cdr code)
-			  (format str "namespace ~a {~% ~{ ~a~%~} };~%"
+			  (format str "namespace ~a {~%~{~a~%~} };~%"
 				  ns (loop for e in block collect 
 					  (emit-cpp :code e)))))
 	(with-compilation-unit (format str "~{~a~%~}"
 				(loop for e in (cdr code) collect 
-				     (emit-cpp :code e)))))
+				     (emit-cpp :code e))))
+	(decl (destructuring-bind (bindings) (cdr code)
+		(with-output-to-string (s)
+		  (loop for e  in bindings do
+		       (destructuring-bind (name &key (type 'auto) init) e
+			(format s "~{~a~^ ~} ~a"
+				(mapcar #'lisp->c (ensure-list type))
+				(lisp->c name))
+			(if init
+			    (format s " = " (emit-cpp :code init)))
+			(format s ";~%"))))))
+	#+nil (let (destructuring-bind (bindings &rest block) (cdr code)
+	       (format str "~{~a~%~}~%"
+		       (loop for e in block collect 
+			       (emit-cpp :code e))))))
       ""))
 
 #+Nil
@@ -57,9 +95,10 @@
   (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp" :direction :output :if-exists :supersede :if-does-not-exist :create)
     (emit-cpp :str s :code
 	      '(with-compilation-unit
-		;(include <stdio.h>)
+		(include <stdio.h>)
+		(include "bla.h")
 		(with-namespace N
-		  #+nil (class gug%%senso ()
+		   (class gug%%senso ()
 		   (access-specifier public)
 		   (functiond f ((a :type int)) int)
 		   (functiond h ((a :type int)) int)
@@ -67,10 +106,13 @@
 		   (functiond f2 ((a :type int)) int)
 		   (functiond h2 ((a :type int)) int))
 		  (class sensor ((public p%%pipeline)
-		  		 (virtual public qqw%%q)))
+		  		 (virtual public qqw%%q)
+				 (virtual public qqw%%q)))
 		  (class lag%%sensor2 ((private p%%pipeline2)))
-		  (functiond g ((a :type char)
-		  	       (b :type int*)) int)
+		  (decl ((i :type int)
+			 (f :type (complex float))))
+		  (function g ((a :type char)
+		  	       (b :type int*)) (complex double%%blub))
 		  ))))
-  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
+ (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
