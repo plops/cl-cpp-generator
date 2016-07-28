@@ -42,52 +42,57 @@ base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fc
 
 (defun emit-cpp (&key code (str nil))
   (if code
-      (case (car code)
-	(:params (loop for e in (cadr code) collect
-		     (destructuring-bind (name &key type) e
-		       (format str "~a ~a" type name))))
-	(include (format str "#include ~s" (cadr code)))
-	(function (destructuring-bind (name params ret &rest rest) (cdr code)
-		    (concatenate 'string
-				 (emit-function-header str name params ret)
-				 (format str "{~a~%}~%"  (emit-cpp :code rest)))))
-	(functiond (destructuring-bind (name params ret) (cdr code)
+      (if (listp code)
+       (case (car code)
+	 (:params (loop for e in (cadr code) collect
+		       (destructuring-bind (name &key type) e
+			 (format str "~a ~a" type name))))
+	 (include (format str "#include ~s" (cadr code)))
+	 (function (destructuring-bind (name params ret &rest rest) (cdr code)
 		     (concatenate 'string
 				  (emit-function-header str name params ret)
-				  ";")))
-	(access-specifier (format str "~a:~%" (cadr code))
-			  ;; public, private or protected
-			  )
-	(class (destructuring-bind (class-key identifier base-clause &rest member-specification) code
+				  (format str "{~a~%}~%"  (emit-cpp :code rest)))))
+	 (functiond (destructuring-bind (name params ret) (cdr code)
+		      (concatenate 'string
+				   (emit-function-header str name params ret)
+				   ";")))
+	 (access-specifier (format str "~a:~%" (cadr code))
+			   ;; public, private or protected
+			   )
+	 (class (destructuring-bind (class-key identifier base-clause &rest member-specification) code
+		  (with-output-to-string (s)
+		    (format s "~a ~a " class-key (lisp->c identifier))
+		    (when base-clause
+		      (format s " : ~{~{~a ~}~^,~}" (loop for e in base-clause
+						       collect (mapcar #'lisp->c e))))
+		    (format s "{~{~a~%~}~%}~%" (loop for e in member-specification collect
+						    (emit-cpp :code e))))))
+	 (with-namespace (destructuring-bind (ns &rest block) (cdr code)
+			   (format str "namespace ~a {~%~{~a~%~} };~%"
+				   ns (loop for e in block collect 
+					   (emit-cpp :code e)))))
+	 (with-compilation-unit (format str "~{~a~%~}"
+				 (loop for e in (cdr code) collect 
+				      (emit-cpp :code e))))
+	 (decl (destructuring-bind (bindings) (cdr code)
 		 (with-output-to-string (s)
-		   (format s "~a ~a " class-key (lisp->c identifier))
-		   (when base-clause
-		     (format s " : ~{~{~a ~}~^,~}" (loop for e in base-clause
-						    collect (mapcar #'lisp->c e))))
-		   (format s "{~{~a~%~}~%}~%" (loop for e in member-specification collect
-						 (emit-cpp :code e))))))
-	(with-namespace (destructuring-bind (ns &rest block) (cdr code)
-			  (format str "namespace ~a {~%~{~a~%~} };~%"
-				  ns (loop for e in block collect 
-					  (emit-cpp :code e)))))
-	(with-compilation-unit (format str "~{~a~%~}"
-				(loop for e in (cdr code) collect 
-				     (emit-cpp :code e))))
-	(decl (destructuring-bind (bindings) (cdr code)
-		(with-output-to-string (s)
-		  (loop for e  in bindings do
-		       (destructuring-bind (name &key (type 'auto) init) e
-			(format s "~{~a~^ ~} ~a"
-				(mapcar #'lisp->c (ensure-list type))
-				(lisp->c name))
-			(if init
-			    (format s " = " (emit-cpp :code init)))
-			(format s ";~%"))))))
-	#+nil (let (destructuring-bind (bindings &rest block) (cdr code)
-	       (format str "~{~a~%~}~%"
-		       (loop for e in block collect 
-			       (emit-cpp :code e))))))
+		   (loop for e  in bindings do
+			(destructuring-bind (name &key (type 'auto) init) e
+			  (format s "~{~a~^ ~} ~a"
+				  (mapcar #'lisp->c (ensure-list type))
+				  (lisp->c name))
+			  (if init
+			      (format s " = ~a" (emit-cpp :code init)))
+			  (format s ";~%"))))))
+	 #+nil (let (destructuring-bind (bindings &rest block) (cdr code)
+		      (format str "~{~a~%~}~%"
+			      (loop for e in block collect 
+				   (emit-cpp :code e)))))
+	 )
+       (cond ((numberp code)
+		(format str "~a" code))))
       ""))
+
 
 #+Nil
 (untrace format)
@@ -109,8 +114,10 @@ base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fc
 		  		 (virtual public qqw%%q)
 				 (virtual public qqw%%q)))
 		  (class lag%%sensor2 ((private p%%pipeline2)))
-		  (decl ((i :type int)
-			 (f :type (complex float))))
+		  (decl ((i :type int :init 0)
+			 (f :type float :init 3.2s0)
+			 (d :type double :init 7.2d3)
+			 (z :type (complex float) :init #.(complex 2s0 1s0))))
 		  (function g ((a :type char)
 		  	       (b :type int*)) (complex double%%blub))
 		  ))))
