@@ -90,9 +90,22 @@ base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fc
 				   (emit-cpp :code e)))))
 	 )
        (cond ((numberp code)
-		(format str "~a" code))))
+	      (cond ((integerp code) (format str "~a" code))
+		    ((floatp code)
+		     (typecase code
+		       (single-float (format str "~,10e" code))
+		       (double-float (format str "~,18e" code))))
+		    ((complexp code)
+		     (typecase (realpart code)
+		       (single-float (format str "~,10e+~,10ei"
+					     (realpart code) (imagpart code)))
+		       (double-float (format str "~,18e+~,18ei"
+					     (realpart code) (imagpart code)))))))))
       ""))
 
+
+
+(type-of (realpart (complex 3.3d0)))
 
 #+Nil
 (untrace format)
@@ -115,11 +128,12 @@ base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fc
 				 (virtual public qqw%%q)))
 		  (class lag%%sensor2 ((private p%%pipeline2)))
 		  (decl ((i :type int :init 0)
-			 (f :type float :init 3.2s0)
-			 (d :type double :init 7.2d3)
-			 (z :type (complex float) :init #.(complex 2s0 1s0))))
+			 (f :type float :init 3.2s-7)
+			 (d :type double :init 7.2d-31)
+			 (z :type (complex float) :init #.(complex 2s0 1s0))
+			 (w :type (complex double) :init #.(complex 2d0 1d0))))
 		  (function g ((a :type char)
 		  	       (b :type int*)) (complex double%%blub))
 		  ))))
- (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
+ ;(sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
