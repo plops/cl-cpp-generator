@@ -93,19 +93,21 @@ base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fc
 	      (cond ((integerp code) (format str "~a" code))
 		    ((floatp code)
 		     (typecase code
-		       (single-float (format str "~,10e" code))
-		       (double-float (format str "~,18e" code))))
+		       (single-float (substitute #\f #\e (format str "~,10e" code)))
+		       (double-float (substitute #\e #\d (format str "~,18e" code)))))
 		    ((complexp code)
 		     (typecase (realpart code)
-		       (single-float (format str "~,10e+~,10ei"
-					     (realpart code) (imagpart code)))
-		       (double-float (format str "~,18e+~,18ei"
-					     (realpart code) (imagpart code)))))))))
+		       (single-float
+			(substitute #\f #\e
+				       (format str "~,10e+~,10ei"
+					       (realpart code) (imagpart code))))
+		       (double-float
+			(substitute #\e #\d
+				       (format nil "~,18e+~,18ei"
+					       (realpart code) (imagpart code))))))))))
       ""))
 
 
-
-(type-of (realpart (complex 3.3d0)))
 
 #+Nil
 (untrace format)
