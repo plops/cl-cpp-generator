@@ -1,0 +1,35 @@
+include arg
+ arg either keyword like <stdio.h> or a string
+
+function name params* ret expr1 expr2 ... 
+name .. function name
+parameters .. 0 or more but always a list
+ret .. return value
+
+struct
+union
+class identifier base-clause
+identifier .. class name like dfa%%flash
+base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fcsdf) (private B::C))
+
+with-namespace name &rest cmds
+
+with-compilation-unit &rest cmds
+
+binary operator (+ a  b c) 
+a + b + c
+
+setf a b c d
+a = b; c = d
+
+computed assignemnt a b
+a += b
+
+block (a b c)
+{
+ a;
+ b;
+ c;
+}
+
+

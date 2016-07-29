@@ -6,43 +6,6 @@
 
 
 ;; OOP A%3A C++-Grammatik (mit Links).html
-#|
-include arg
- arg either keyword like <stdio.h> or a string
-
-function name params* ret expr1 expr2 ... 
-name .. function name
-parameters .. 0 or more but always a list
-ret .. return value
-
-struct
-union
-class identifier base-clause
-identifier .. class name like dfa%%flash
-base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fcsdf) (private B::C))
-
-with-namespace name &rest cmds
-
-with-compilation-unit &rest cmds
-
-binary operator (+ a  b c) 
-a + b + c
-
-setf a b c d
-a = b; c = d
-
-computed assignemnt a b
-a += b
-
-block (a b c)
-{
- a;
- b;
- c;
-}
-
-
-|#
 (defparameter *special-symbol*
   '(! &=  ++    ->      /=      <<=     >>    |\||
     !=  |(|     +=      ->*     |:|     <=      >>=     |\|=|
@@ -117,10 +80,13 @@ block (a b c)
 			  (format s ";~%"))))))
 	 (setf (with-output-to-string (s)
 		 (let ((args (cdr code)))
-		  (loop for i below (length args) by 2 do
-		       (format s "~a = ~a;~%"
+		  (loop for i below (- (length args) 2) by 2 do
+		       (format s "~a = ~a;"
 			       (emit-cpp :code (elt args i))
-			       (emit-cpp :code (elt args (1+ i))))))
+			       (emit-cpp :code (elt args (1+ i)))))
+		  (format s "~a = ~a"
+			       (emit-cpp :code (elt args (- (length args) 2)))
+			       (emit-cpp :code (elt args (- (length args) 1)))))
 		 ))
 	 #+nil (let (destructuring-bind (bindings &rest block) (cdr code)
 		      (format str "~{~a~%~}~%"
@@ -202,9 +168,9 @@ block (a b c)
 		  (function g ((a :type char)
 		  	       (b :type int*)) "complex double::blub"
 		   (block
-		    (setf  3 (+ 1 2 3)
-			   43 (+ 1 2 3))
-		     (+= 3 (* 2 3 4)))
+		    (setf  q (+ 1 2 3)
+			   l (+ 1 2 3))
+		     (+= m (* 2 3 4)))
 		   (setf b (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39))))))
 		  ))))
  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
