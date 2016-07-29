@@ -60,8 +60,8 @@ with-compilation-unit &rest cmds
       (list x)))
 
 (defun emit-function-header (str name params ret)
-  (format str "~{~a~^ ~} ~a(~{~a~^,~})"
-	  (mapcar #'lisp->c (ensure-list ret))
+  (format str "~a ~a(~{~a~^,~})"
+	  ret
 	  name
 	  (emit-cpp :code `(:params ,params))))
 
@@ -86,10 +86,9 @@ with-compilation-unit &rest cmds
 			   )
 	 (class (destructuring-bind (class-key identifier base-clause &rest member-specification) code
 		  (with-output-to-string (s)
-		    (format s "~a ~a " class-key (lisp->c identifier))
+		    (format s "~a ~a " class-key identifier)
 		    (when base-clause
-		      (format s " : ~{~{~a ~}~^,~}" (loop for e in base-clause
-						       collect (mapcar #'lisp->c e))))
+		      (format s " :~{ ~a~^,~}" base-clause))
 		    (format s "{~{~a~%~}~%}~%" (loop for e in member-specification collect
 						    (emit-cpp :code e))))))
 	 (with-namespace (destructuring-bind (ns &rest block) (cdr code)
@@ -103,9 +102,8 @@ with-compilation-unit &rest cmds
 		 (with-output-to-string (s)
 		   (loop for e  in bindings do
 			(destructuring-bind (name &key (type 'auto) init) e
-			  (format s "~{~a~^ ~} ~a"
-				  (mapcar #'lisp->c (ensure-list type))
-				  (lisp->c name))
+			  (format s "~a ~a"
+				  type name)
 			  (if init
 			      (format s " = ~a" (emit-cpp :code init)))
 			  (format s ";~%"))))))
@@ -134,7 +132,6 @@ with-compilation-unit &rest cmds
       ""))
 
 
-
 #+Nil
 (untrace format)
 (progn
@@ -144,24 +141,24 @@ with-compilation-unit &rest cmds
 		(include <stdio.h>)
 		(include "bla.h")
 		(with-namespace N
-		   (class gug%%senso ()
+		   (class |gug::senso| ()
 		   (access-specifier public)
 		   (functiond f ((a :type int)) int)
 		   (functiond h ((a :type int)) int)
 		   (access-specifier private)
 		   (functiond f2 ((a :type int)) int)
 		   (functiond h2 ((a :type int)) int))
-		  (class sensor ((public p%%pipeline)
-		  		 |virtual public qqw::q|
-				 (virtual public qqw%%q)))
-		  (class lag%%sensor2 ((private p%%pipeline2)))
+		  (class sensor (|public p::pipeline|
+				 |virtual public qqw::q|
+				 |virtual public qq::q|))
+		  (class |lag::sensor2| (|private p::pipeline2|))
 		  (decl ((i :type int :init 0)
 			 (f :type float :init 3.2s-7)
 			 (d :type double :init 7.2d-31)
-			 (z :type (complex float) :init #.(complex 2s0 1s0))
-			 (w :type (complex double) :init #.(complex 2d0 1d0))))
+			 (z :type |complex float| :init #.(complex 2s0 1s0))
+			 (w :type |complex double| :init #.(complex 2d0 1d0))))
 		  (function g ((a :type char)
-		  	       (b :type int*)) (complex double%%blub))
+		  	       (b :type int*)) |complex double::blub|)
 		  ))))
  ;(sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
