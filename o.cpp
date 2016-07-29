@@ -17,7 +17,7 @@ class sensor : public p::pipeline,
                virtual public qq::q {
 }
 
-class lag::sensor2 : private p::pipeline2 {
+union lag::sensor2 : private p::pipeline2 {
 }
 
 int i = 0;

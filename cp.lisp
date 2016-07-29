@@ -15,6 +15,8 @@ name .. function name
 parameters .. 0 or more but always a list
 ret .. return value
 
+struct
+union
 class identifier base-clause
 identifier .. class name like dfa%%flash
 base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fcsdf) (private B::C))
@@ -61,6 +63,9 @@ block (a b c)
 (defparameter *computed-assignment-operator-symbol*
   '(*= /= %= += -= ^= &= |\|=| <<= >>=))
 
+(defparameter *class-key*
+  '(class struct union))
+
 #+nil
 (trace emit-cpp)
 
@@ -94,13 +99,6 @@ block (a b c)
 	 (access-specifier (format str "~a:~%" (cadr code))
 			   ;; public, private or protected
 			   )
-	 (class (destructuring-bind (class-key identifier base-clause &rest member-specification) code
-		  (with-output-to-string (s)
-		    (format s "~a ~a " class-key identifier)
-		    (when base-clause
-		      (format s " :~{ ~a~^,~}" base-clause))
-		    (format s "{~{~a~%~}~%}~%" (loop for e in member-specification collect
-						    (emit-cpp :code e))))))
 	 (with-namespace (destructuring-bind (ns &rest block) (cdr code)
 			   (format str "namespace ~a {~%~{~a~%~} };~%"
 				   ns (loop for e in block collect 
@@ -129,13 +127,24 @@ block (a b c)
 			      (loop for e in block collect 
 				   (emit-cpp :code e)))))
 	 (t (cond ((member (car code) *binary-operator-symbol*)
+		   ;; handle binary operators
 		   (with-output-to-string (s)
 		     (format s "(")
 		     (loop for e in (cdr code)
 			and i below (1- (length (cdr code))) do
 			  (format s "~a ~a " (emit-cpp :code e) (car code)))
 		     (format s "~a)" (emit-cpp :code (car (last (cdr code)))))))
+		  ((member (car code) *class-key*)
+		   ;; handle class, struct or union definitions
+		   (destructuring-bind (class-key identifier base-clause &rest member-specification) code
+		  (with-output-to-string (s)
+		    (format s "~a ~a " class-key identifier)
+		    (when base-clause
+		      (format s " :~{ ~a~^,~}" base-clause))
+		    (format s "{~{~a~%~}~%}~%" (loop for e in member-specification collect
+						    (emit-cpp :code e))))))
 		  ((member (car code) *computed-assignment-operator-symbol*)
+		   ;; handle computed assignment
 		   (format str "~a ~a ~a"
 			   (emit-cpp :code (second code))
 			   (car code) ;; assignment operator
@@ -167,7 +176,8 @@ block (a b c)
 #+Nil
 (untrace format)
 (progn
-  (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp" :direction :output :if-exists :supersede :if-does-not-exist :create)
+  (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
+		     :direction :output :if-exists :supersede :if-does-not-exist :create)
     (emit-cpp :str s :code
 	      '(with-compilation-unit
 		(include <stdio.h>)
@@ -183,7 +193,7 @@ block (a b c)
 		  (class sensor ("public p::pipeline"
 				 "virtual public qqw::q"
 				 "virtual public qq::q"))
-		  (class "lag::sensor2" ("private p::pipeline2"))
+		  (union "lag::sensor2" ("private p::pipeline2"))
 		  (decl ((i :type int :init 0)
 			 (f :type float :init 3.2s-7)
 			 (d :type double :init 7.2d-31)
