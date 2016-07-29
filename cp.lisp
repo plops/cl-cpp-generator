@@ -23,7 +23,14 @@ with-namespace name &rest cmds
 
 with-compilation-unit &rest cmds
 
+binary operator (+ a  b c) 
+a + b + c
 
+setf a b c d
+a = b; c = d
+
+computed assignemnt a b
+a += b
 
 |#
 (defparameter *special-symbol*
@@ -153,6 +160,8 @@ with-compilation-unit &rest cmds
 			and i below (1- (length (cdr code))) do
 			  (format s "~a ~a " (emit-cpp :code e) (car code)))
 		     (format s "~a)" (emit-cpp :code (car (last (cdr code)))))))
+		  ((member (car code) *computed-assignment-operator-symbol*)
+		   (format str "~a ~a ~a" (second code) (car code) (third code)))
 		  (t (format nil "not processable: ~a" code)))))
        (cond ((numberp code)
 	      (cond ((integerp code) (format str "~a" code))
@@ -203,7 +212,7 @@ with-compilation-unit &rest cmds
 		  	       (b :type int*)) "complex double::blub"
 		   (setf  3 (+ 1 2 3)
 			  43 (+ 1 2 3))
-		   (* 2 3 4)
+		   (+= 3 (* 2 3 4))
 		   (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39)))))
 		  ))))
  ;(sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
