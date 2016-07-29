@@ -105,7 +105,7 @@ with-compilation-unit &rest cmds
 				  (with-output-to-string (s)
 				    (format s "{~%")
 				    (loop for e in rest do
-				     (format s "  ~a~%"  (emit-cpp :code e)))
+				     (format s "  ~a;~%"  (emit-cpp :code e)))
 				    (format s "~%}~%")))))
 	 (functiond (destructuring-bind (name params ret) (cdr code)
 		      (concatenate 'string
@@ -196,7 +196,8 @@ with-compilation-unit &rest cmds
 		  (function g ((a :type char)
 		  	       (b :type int*)) "complex double::blub"
 		   (+ 1 2 3)
-		   (* 2 3 4))
+		   (* 2 3 4)
+		   (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 1 3 (+ 2 39)))))
 		  ))))
  ;(sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
