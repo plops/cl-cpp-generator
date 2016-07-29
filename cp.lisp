@@ -156,7 +156,9 @@ block (a b c)
 	 (setf (with-output-to-string (s)
 		 (let ((args (cdr code)))
 		  (loop for i below (length args) by 2 do
-		       (format s "~a = ~a;~%" (elt args i) (elt args (1+ i)))))
+		       (format s "~a = ~a;~%"
+			       (emit-cpp :code (elt args i))
+			       (emit-cpp :code (elt args (1+ i))))))
 		 ))
 	 #+nil (let (destructuring-bind (bindings &rest block) (cdr code)
 		      (format str "~{~a~%~}~%"
@@ -170,7 +172,10 @@ block (a b c)
 			  (format s "~a ~a " (emit-cpp :code e) (car code)))
 		     (format s "~a)" (emit-cpp :code (car (last (cdr code)))))))
 		  ((member (car code) *computed-assignment-operator-symbol*)
-		   (format str "~a ~a ~a" (second code) (car code) (third code)))
+		   (format str "~a ~a ~a"
+			   (emit-cpp :code (second code))
+			   (car code) ;; assignment operator
+			   (emit-cpp :code (third code))))
 		  (t (format nil "not processable: ~a" code)))))
        (cond ((numberp code)
 	      (cond ((integerp code) (format str "~a" code))
