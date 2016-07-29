@@ -65,6 +65,32 @@ with-compilation-unit &rest cmds
 	  name
 	  (emit-cpp :code `(:params ,params))))
 
+
+(defmacro my-with-one-string ((string start end) &body forms)
+  `(let ((,string (%string ,string)))
+     (sb-impl::with-array-data ((,string ,string)
+                       (,start ,start)
+                       (,end ,end)
+                       :check-fill-pointer t)
+       ,@forms)))
+
+#+nil
+(flet ((%invertcase (string start end)
+         (declare (string string) (sb-impl::index start) (type sb-kernel::sequence-end end))
+         (let ((saved-header string))
+           (sb-impl::with-one-string (string start end)
+             (do ((index start (1+ index)))
+                 ((= index (the fixnum end)))
+               (declare (fixnum index))
+               (setf (schar string index)
+                     (char-downcase (schar string index)))))
+           saved-header)))
+  (defun string-invertcase (string &key (start 0) end)
+    (%invertcase (copy-seq (string string)) start end))
+  (defun nstring-invertcase (string &key (start 0) end)
+    (%invertcase string start end)))
+
+
 (defun emit-cpp (&key code (str nil))
   (if code
       (if (listp code)
@@ -141,24 +167,24 @@ with-compilation-unit &rest cmds
 		(include <stdio.h>)
 		(include "bla.h")
 		(with-namespace N
-		   (class |gug::senso| ()
+		   (class "gug::senso" ()
 		   (access-specifier public)
 		   (functiond f ((a :type int)) int)
 		   (functiond h ((a :type int)) int)
 		   (access-specifier private)
 		   (functiond f2 ((a :type int)) int)
 		   (functiond h2 ((a :type int)) int))
-		  (class sensor (|public p::pipeline|
-				 |virtual public qqw::q|
-				 |virtual public qq::q|))
-		  (class |lag::sensor2| (|private p::pipeline2|))
+		  (class sensor ("public p::pipeline"
+				 "virtual public qqw::q"
+				 "virtual public qq::q"))
+		  (class "lag::sensor2" ("private p::pipeline2"))
 		  (decl ((i :type int :init 0)
 			 (f :type float :init 3.2s-7)
 			 (d :type double :init 7.2d-31)
-			 (z :type |complex float| :init #.(complex 2s0 1s0))
-			 (w :type |complex double| :init #.(complex 2d0 1d0))))
+			 (z :type "complex float" :init #.(complex 2s0 1s0))
+			 (w :type "complex double" :init #.(complex 2d0 1d0))))
 		  (function g ((a :type char)
-		  	       (b :type int*)) |complex double::blub|)
+		  	       (b :type int*)) "complex double::blub")
 		  ))))
  ;(sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
