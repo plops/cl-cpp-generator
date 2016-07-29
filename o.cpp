@@ -24,7 +24,7 @@ double d = 7.200000000000000000e-31;
 complex float z = 2.0000000000f+0+1.0000000000f+0i;
 complex double w = 2.000000000000000000e+0+1.000000000000000000e+0i;
 
-complex double::blub g(char a,int* b){
+complex double::blub g(char a,int* b){nil
 }
 
  };

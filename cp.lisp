@@ -137,8 +137,10 @@ with-compilation-unit &rest cmds
 		      (format str "~{~a~%~}~%"
 			      (loop for e in block collect 
 				   (emit-cpp :code e)))))
-	 (t (cond ((member (car code) *special-symbol*)
-		   ))))
+	 (t (cond ((member (car code) *binary-operator-symbol*)
+		   (with-output-to-string (s)
+		     (loop for e in (cdr code) do
+			  (format str "~a~^~a" e (car code))))))))
        (cond ((numberp code)
 	      (cond ((integerp code) (format str "~a" code))
 		    ((floatp code)
@@ -156,6 +158,7 @@ with-compilation-unit &rest cmds
 				       (format nil "~,18e+~,18ei"
 					       (realpart code) (imagpart code))))))))))
       ""))
+
 
 
 #+Nil
@@ -184,7 +187,8 @@ with-compilation-unit &rest cmds
 			 (z :type "complex float" :init #.(complex 2s0 1s0))
 			 (w :type "complex double" :init #.(complex 2d0 1d0))))
 		  (function g ((a :type char)
-		  	       (b :type int*)) "complex double::blub")
+		  	       (b :type int*)) "complex double::blub"
+		   (+ a b))
 		  ))))
  ;(sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
