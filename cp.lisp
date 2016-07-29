@@ -64,47 +64,11 @@ block (a b c)
 #+nil
 (trace emit-cpp)
 
-(defun lisp->c (name)
-  (substitute #\_ #\-
-	      (substitute #\: #\% (format nil "~a" name))))
-
-(defun ensure-list (x)
-  "Make sure x is in a list."
-  (if (listp x)
-      x
-      (list x)))
-
 (defun emit-function-header (str name params ret)
   (format str "~a ~a(~{~a~^,~})"
 	  ret
 	  name
 	  (emit-cpp :code `(:params ,params))))
-
-
-(defmacro my-with-one-string ((string start end) &body forms)
-  `(let ((,string (%string ,string)))
-     (sb-impl::with-array-data ((,string ,string)
-                       (,start ,start)
-                       (,end ,end)
-                       :check-fill-pointer t)
-       ,@forms)))
-
-#+nil
-(flet ((%invertcase (string start end)
-         (declare (string string) (sb-impl::index start) (type sb-kernel::sequence-end end))
-         (let ((saved-header string))
-           (sb-impl::with-one-string (string start end)
-             (do ((index start (1+ index)))
-                 ((= index (the fixnum end)))
-               (declare (fixnum index))
-               (setf (schar string index)
-                     (char-downcase (schar string index)))))
-           saved-header)))
-  (defun string-invertcase (string &key (start 0) end)
-    (%invertcase (copy-seq (string string)) start end))
-  (defun nstring-invertcase (string &key (start 0) end)
-    (%invertcase string start end)))
-
 
 (defun emit-cpp (&key code (str nil))
   (if code
