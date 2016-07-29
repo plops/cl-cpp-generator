@@ -137,6 +137,11 @@ with-compilation-unit &rest cmds
 			  (if init
 			      (format s " = ~a" (emit-cpp :code init)))
 			  (format s ";~%"))))))
+	 (setf (with-output-to-string (s)
+		 (let ((args (cdr code)))
+		  (loop for i below (length args) by 2 do
+		       (format s "~a = ~a;~%" (elt args i) (elt args (1+ i)))))
+		 ))
 	 #+nil (let (destructuring-bind (bindings &rest block) (cdr code)
 		      (format str "~{~a~%~}~%"
 			      (loop for e in block collect 
@@ -196,7 +201,8 @@ with-compilation-unit &rest cmds
 			 (w :type "complex double" :init #.(complex 2d0 1d0))))
 		  (function g ((a :type char)
 		  	       (b :type int*)) "complex double::blub"
-		   (+ 1 2 3)
+		   (setf  3 (+ 1 2 3)
+			  43 (+ 1 2 3))
 		   (* 2 3 4)
 		   (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39)))))
 		  ))))
