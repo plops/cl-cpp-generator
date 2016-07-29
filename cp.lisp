@@ -102,7 +102,11 @@ with-compilation-unit &rest cmds
 	 (function (destructuring-bind (name params ret &rest rest) (cdr code)
 		     (concatenate 'string
 				  (emit-function-header str name params ret)
-				  (format str "{~a~%}~%"  (emit-cpp :code rest)))))
+				  (with-output-to-string (s)
+				    (format s "{~%")
+				    (loop for e in rest do
+				     (format s "  ~a~%"  (emit-cpp :code e)))
+				    (format s "~%}~%")))))
 	 (functiond (destructuring-bind (name params ret) (cdr code)
 		      (concatenate 'string
 				   (emit-function-header str name params ret)
@@ -139,23 +143,26 @@ with-compilation-unit &rest cmds
 				   (emit-cpp :code e)))))
 	 (t (cond ((member (car code) *binary-operator-symbol*)
 		   (with-output-to-string (s)
-		     (loop for e in (cdr code) do
-			  (format str "~a~^~a" e (car code))))))))
+		     (loop for e in (cdr code)
+			and i below (1- (length (cdr code))) do
+			  (format s "~a ~a " e (car code)))
+		     (format s "~a" (last (cdr code)))))
+		  (t (format nil "~a" code)))))
        (cond ((numberp code)
 	      (cond ((integerp code) (format str "~a" code))
 		    ((floatp code)
 		     (typecase code
-		       (single-float (substitute #\f #\e (format str "~,10e" code)))
-		       (double-float (substitute #\e #\d (format str "~,18e" code)))))
+		       (single-float (substitute #\f #\e (format str "(~,10e)" code)))
+		       (double-float (substitute #\e #\d (format str "(~,18e)" code)))))
 		    ((complexp code)
 		     (typecase (realpart code)
 		       (single-float
 			(substitute #\f #\e
-				       (format str "~,10e+~,10ei"
+				       (format str "((~,10e) + (~,10ei))"
 					       (realpart code) (imagpart code))))
 		       (double-float
 			(substitute #\e #\d
-				       (format nil "~,18e+~,18ei"
+				       (format nil "((~,18e) + (~,18ei))"
 					       (realpart code) (imagpart code))))))))))
       ""))
 
@@ -188,7 +195,8 @@ with-compilation-unit &rest cmds
 			 (w :type "complex double" :init #.(complex 2d0 1d0))))
 		  (function g ((a :type char)
 		  	       (b :type int*)) "complex double::blub"
-		   (+ a b))
+		   (+ 1 2 3)
+		   (* 2 3 4))
 		  ))))
  ;(sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
