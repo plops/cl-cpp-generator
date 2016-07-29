@@ -59,6 +59,10 @@
 		      (concatenate 'string
 				   (emit-function-header str name params ret)
 				   ";")))
+	 (constructord (destructuring-bind (name params) (cdr code)
+			 (format str "~a(~{~a~^,~});"
+				 name
+				 (emit-cpp :code `(:params ,params)))))
 	 (access-specifier (format str "~a:~%" (cadr code))
 			   ;; public, private or protected
 			   )
@@ -175,3 +179,23 @@
 		  ))))
  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
+
+
+
+(with-open-file (s "o.cpp"
+		   :direction :output
+		   :if-exists :supersede
+		   :if-does-not-exist :create)
+  (emit-cpp :str s :code
+	    '(with-compilation-unit
+	      (include <complex>)
+	      (include "org_types.h")
+	      (with-namespace N
+		(class CommandsHandler ()
+		 (access-specifier public)
+		 (constructord CommandsHandler ((callbacks :type "const DeviceCallbacks")))
+		 (functiond HandleRxBlock ((data :type "const uint16_t")) void))
+		(function HandleRxBlock ((data :type "const uint16_t")) void
+		 (decl ((a :type uint16_t :init 3)
+			(b :type uint16_t)))
+		 (+= a data))))))

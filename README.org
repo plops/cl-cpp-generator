@@ -1,3 +1,52 @@
+* CL-CPP-GENERATOR
+
+** Introduction
+This project provides the Common Lisp function ~emit-cpp &key code
+str~. It receives a list of special s-expressions and emits
+corresponding C++ code into a string.
+
+** Example
+
+#+BEGIN_SRC common-lisp
+(with-open-file (s "o.cpp"
+                   :direction :output
+                   :if-exists :supersede
+                   :if-does-not-exist :create)
+  (emit-cpp :str s :code
+            '(with-compilation-unit
+              (include <complex>)
+              (include "org_types.h")
+              (with-namespace N
+                (class CommandsHandler ()
+                 (access-specifier public)
+                 (constructord CommandsHandler ((callbacks :type "const DeviceCallbacks")))
+                 (functiond HandleRxBlock ((data :type "const uint16_t")) void))
+                (function HandleRxBlock ((data :type "const uint16_t")) void
+                 (decl ((a :type uint16_t :init 3)
+                        (b :type uint16_t)))
+                 (+= a data))))))
+#+END_SRC
+
+#+BEGIN_SRC c++
+#include "org_types.h"
+#include <complex>
+namespace N {
+class CommandsHandler {
+public:
+  CommandsHandler(const DeviceCallbacks callbacks);
+  void HandleRxBlock(const uint16_t data);
+
+}
+
+void HandleRxBlock(const uint16_t data){
+  uint16_t a = 3;
+  uint16_t b;
+  ;
+  a += data;
+}
+};
+#+END_SRC
+
 include arg
  arg either keyword like <stdio.h> or a string
 
@@ -5,6 +54,12 @@ function name params* ret expr1 expr2 ...
 name .. function name
 parameters .. 0 or more but always a list
 ret .. return value
+
+
+constructord name params*
+functiond name params* ret expr ..
+
+
 
 struct
 union
@@ -32,4 +87,6 @@ block (a b c)
  c;
 }
 
+decl ((name :type type :init 0) ( .. ) (.. ) .. )
 
+type name = 0;
