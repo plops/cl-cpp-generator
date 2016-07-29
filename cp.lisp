@@ -19,7 +19,32 @@ class identifier base-clause
 identifier .. class name like dfa%%flash
 base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fcsdf) (private B::C))
 
+with-namespace name &rest cmds
+
+with-compilation-unit &rest cmds
+
+
+
 |#
+(defparameter *special-symbol*
+  '(! &=  ++    ->      /=      <<=     >>    |\||
+    !=  |(|     +=      ->*     |:|     <=      >>=     |\|=|
+    %   |)|     |,|     |.|     |::|    =       ?       ||||
+    %=  *       -       |.*|    |;|     ==      ^       }
+    &   *=      --      |...|   <       >       ^=      ~
+    &&  +       -=      /       <<      >=      {))
+
+(defparameter *unary-operator-symbol*
+  '(+ - ~ !))
+
+(defparameter *binary-operator-symbol*
+  '(* / % + - ^ & |\|| << >>))
+
+(defparameter *logical-operator-symbol*
+  '(== != < > <= >= && ||||))
+
+(defparameter *computed-assignment-operator-symbol*
+  '(*= /= %= += -= ^= &= |\|=| <<= >>=))
 
 #+nil
 (trace emit-cpp)
@@ -88,7 +113,8 @@ base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fc
 		      (format str "~{~a~%~}~%"
 			      (loop for e in block collect 
 				   (emit-cpp :code e)))))
-	 )
+	 (t (cond ((member (car code) *special-symbol*)
+		   ))))
        (cond ((numberp code)
 	      (cond ((integerp code) (format str "~a" code))
 		    ((floatp code)
@@ -126,7 +152,7 @@ base-clause .. (()) or ((public virtual buh%%fcsdf)) or ((public virtual buh%%fc
 		   (functiond f2 ((a :type int)) int)
 		   (functiond h2 ((a :type int)) int))
 		  (class sensor ((public p%%pipeline)
-		  		 (virtual public qqw%%q)
+		  		 |virtual public qqw::q|
 				 (virtual public qqw%%q)))
 		  (class lag%%sensor2 ((private p%%pipeline2)))
 		  (decl ((i :type int :init 0)
