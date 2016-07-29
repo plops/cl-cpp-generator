@@ -177,7 +177,10 @@ block (a b c)
 			   (car code) ;; assignment operator
 			   (emit-cpp :code (third code))))
 		  (t (format nil "not processable: ~a" code)))))
-       (cond ((numberp code)
+       (cond
+	 ((symbolp code)
+	  (format str "~a" code))
+	 ((numberp code) ;; print constants
 	      (cond ((integerp code) (format str "~a" code))
 		    ((floatp code)
 		     (typecase code
@@ -228,7 +231,7 @@ block (a b c)
 		    (setf  3 (+ 1 2 3)
 			   43 (+ 1 2 3))
 		     (+= 3 (* 2 3 4)))
-		   (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39)))))
+		   (setf b (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39))))))
 		  ))))
  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
