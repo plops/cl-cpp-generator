@@ -32,6 +32,14 @@ a = b; c = d
 computed assignemnt a b
 a += b
 
+block (a b c)
+{
+ a;
+ b;
+ c;
+}
+
+
 |#
 (defparameter *special-symbol*
   '(! &=  ++    ->      /=      <<=     >>    |\||
@@ -106,14 +114,15 @@ a += b
 		       (destructuring-bind (name &key type) e
 			 (format str "~a ~a" type name))))
 	 (include (format str "#include ~s" (cadr code)))
+	 (block (with-output-to-string (s)
+		  (format s "{~%")
+		  (loop for e in (cdr code) do
+		       (format s "  ~a;~%"  (emit-cpp :code e)))
+		  (format s "~%}~%")))
 	 (function (destructuring-bind (name params ret &rest rest) (cdr code)
 		     (concatenate 'string
 				  (emit-function-header str name params ret)
-				  (with-output-to-string (s)
-				    (format s "{~%")
-				    (loop for e in rest do
-				     (format s "  ~a;~%"  (emit-cpp :code e)))
-				    (format s "~%}~%")))))
+				  (emit-cpp :code `(block ,@rest)))))
 	 (functiond (destructuring-bind (name params ret) (cdr code)
 		      (concatenate 'string
 				   (emit-function-header str name params ret)
