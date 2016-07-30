@@ -82,6 +82,12 @@
 			  (if init
 			      (format s " = ~a" (emit-cpp :code init)))
 			  (format s ";~%"))))))
+	 (let (destructuring-bind (bindings &rest rest) (cdr code)
+		(emit-cpp :code `(block
+				     (decl ,bindings)
+				   ,@rest))
+		#+nil
+		(emit-cpp :code `(,(emit-cpp :code `(decl ,bindings)) ,rest))))
 	 (setf (with-output-to-string (s)
 		 (let ((args (cdr code)))
 		  (loop for i below (- (length args) 2) by 2 do
@@ -92,10 +98,7 @@
 			       (emit-cpp :code (elt args (- (length args) 2)))
 			       (emit-cpp :code (elt args (- (length args) 1)))))
 		 ))
-	 #+nil (let (destructuring-bind (bindings &rest block) (cdr code)
-		      (format str "~{~a~%~}~%"
-			      (loop for e in block collect 
-				   (emit-cpp :code e)))))
+	 
 	 (t (cond ((member (car code) *binary-operator-symbol*)
 		   ;; handle binary operators
 		   (with-output-to-string (s)
@@ -143,8 +146,15 @@
 
 
 
-#+Nil
-(untrace format)
+(with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
+		     :direction :output :if-exists :supersede :if-does-not-exist :create)
+    (emit-cpp :str s :code
+	      '(with-compilation-unit
+		(let ((i :type int))
+		  (setf i (+ f d))
+		  (+= i 32)))))
+
+#+nil
 (progn
   (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
@@ -163,39 +173,30 @@
 		  (class sensor ("public p::pipeline"
 				 "virtual public qqw::q"
 				 "virtual public qq::q"))
-		  (union "lag::sensor2" ("private p::pipeline2"))
+		  
 		  (decl ((i :type int :init 0)
 			 (f :type float :init 3.2s-7)
 			 (d :type double :init 7.2d-31)
 			 (z :type "complex float" :init #.(complex 2s0 1s0))
 			 (w :type "complex double" :init #.(complex 2d0 1d0))))
+		  (union "lag::sensor2" ("private p::pipeline2"))
+		  (let ((i :type int :init 0)
+			(f :type float :init 3.2s-7)
+			(d :type double :init 7.2d-31)
+			(z :type "complex float" :init #.(complex 2s0 1s0))
+			(w :type "complex double" :init #.(complex 2d0 1d0)))
+		    (setf i (+ f d)))
 		  (function g ((a :type char)
 		  	       (b :type int*)) "complex double::blub"
 		   (block
 		    (setf  q (+ 1 2 3)
 			   l (+ 1 2 3))
-		     (+= m (* 2 3 4)))
+		   #+nil  (if (< q l)
+			 (+= m (* 2 3 4))
+			 (+= m (- 2 3 4))))
 		   (setf b (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39))))))
 		  ))))
  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
 
 
-
-(with-open-file (s "o.cpp"
-		   :direction :output
-		   :if-exists :supersede
-		   :if-does-not-exist :create)
-  (emit-cpp :str s :code
-	    '(with-compilation-unit
-	      (include <complex>)
-	      (include "org_types.h")
-	      (with-namespace N
-		(class CommandsHandler ()
-		 (access-specifier public)
-		 (constructord CommandsHandler ((callbacks :type "const DeviceCallbacks")))
-		 (functiond HandleRxBlock ((data :type "const uint16_t")) void))
-		(function HandleRxBlock ((data :type "const uint16_t")) void
-		 (decl ((a :type uint16_t :init 3)
-			(b :type uint16_t)))
-		 (+= a data))))))
