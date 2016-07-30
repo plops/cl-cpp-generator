@@ -83,7 +83,7 @@ a += b
 logical operator ==
 a == b
 
-block (a b c)
+compound-statement (a b c)
 {
  a;
  b;
@@ -105,3 +105,7 @@ for
 for(int i=a;i<n;i+=1)
 
 i only allow one variable initialization
+
+
+statement 
+ensure a semicolon at the end

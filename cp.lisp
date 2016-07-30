@@ -46,7 +46,7 @@
 		       (destructuring-bind (name &key type) e
 			 (format str "~a ~a" type name))))
 	 (include (format str "#include ~s" (cadr code)))
-	 (block (with-output-to-string (s)
+	 (compound-statement (with-output-to-string (s)
 		  (format s "{~%")
 		  (loop for e in (cdr code) do
 		       (format s "  ~a~%"  (emit-cpp :code e)))
@@ -54,7 +54,7 @@
 	 (function (destructuring-bind (name params ret &rest rest) (cdr code)
 		     (concatenate 'string
 				  (emit-function-header str name params ret)
-				  (emit-cpp :code `(block ,@rest)))))
+				  (emit-cpp :code `(compound-statement ,@rest)))))
 	 (functiond (destructuring-bind (name params ret) (cdr code)
 		      (concatenate 'string
 				   (emit-function-header str name params ret)
@@ -66,9 +66,9 @@
 	 (access-specifier (format str "~a:~%" (cadr code))
 			   ;; public, private or protected
 			   )
-	 (with-namespace (destructuring-bind (ns &rest block) (cdr code)
+	 (with-namespace (destructuring-bind (ns &rest compound-statement) (cdr code)
 			   (format str "namespace ~a {~%~{~a~%~} };~%"
-				   ns (loop for e in block collect 
+				   ns (loop for e in compound-statement collect 
 					   (emit-cpp :code e)))))
 	 (with-compilation-unit (format str "~{~a~%~}"
 				 (loop for e in (cdr code) collect 
@@ -83,26 +83,27 @@
 			      (format s " = ~a" (emit-cpp :code init)))
 			  (format s ";~%"))))))
 	 (let (destructuring-bind (bindings &rest rest) (cdr code)
-		(emit-cpp :code `(block
+		(emit-cpp :code `(compound-statement
 				     (decl ,bindings)
 				   ,@rest))))
-	 (for (destructuring-bind (initial condition update &rest rest) (cdr code)
-		  (format str "for(~a; ~a; ~a) ~a"
-			  (if initial
-			      (destructuring-bind (name init &key (type 'auto)) initial
-				(format nil "~a ~a = ~a" type name (emit-cpp :code init)))
-			      "")
-			  (emit-cpp :code condition)
-			  (emit-cpp :code update)
-			  (emit-cpp :code `(block ,@rest)))))
-	 (if (destructuring-bind (condition true-clause &optional false-clause) (cdr code)
+	 (for (destructuring-bind ((for-init-statement &optional condition update-expression) &rest statement-list)
+		  (cdr code)
+		(format str "for(~a; ~a; ~a) ~a"
+			(if for-init-statement
+			    (destructuring-bind (name init &key (type 'auto)) for-init-statement
+			      (format nil "~a ~a = ~a" type name (emit-cpp :code init)))
+			    "")
+			(emit-cpp :code condition-opt)
+			(emit-cpp :code update)
+			(emit-cpp :code `(compound-statement ,@rest)))))
+	 (if (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
 	       (with-output-to-string (s)
 		 (format s "if (~a) ~a"
 			 (emit-cpp :code condition)
-			 (emit-cpp :code `(block ,true-clause)))
-		 (when false-clause
+			 (emit-cpp :code `(compound-statement ,true-statement)))
+		 (when false-statement
 		  (format s "else ~a"
-			  (emit-cpp :code `(block ,false-clause)))))))
+			  (emit-cpp :code `(compound-statement ,false-statement)))))))
 	 (setf (with-output-to-string (s)
 		 ;; handle multiple assignments
 		 ;; adds semicolons
@@ -212,10 +213,10 @@
 		    (setf i (+ f d)))
 		  (function g ((a :type char)
 		  	       (b :type int*)) "complex double::blub"
-		   (block
+		   (compound-statement
 		    (setf  q (+ 1 2 3)
 			   l (+ 1 2 3))
-		     (block
+		     (compound-statement
 			 (if (== a b)
 			     (+ a b)
 			     (- a b))
