@@ -49,7 +49,7 @@
 	 (block (with-output-to-string (s)
 		  (format s "{~%")
 		  (loop for e in (cdr code) do
-		       (format s "  ~a;~%"  (emit-cpp :code e)))
+		       (format s "  ~a~%"  (emit-cpp :code e)))
 		  (format s "~%}~%")))
 	 (function (destructuring-bind (name params ret &rest rest) (cdr code)
 		     (concatenate 'string
@@ -153,16 +153,14 @@
       ""))
 
 
-
+#+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
     (emit-cpp :str s :code
 	      '(with-compilation-unit
-		(if (== a b)
-		    (+ a b)
-		    (- a b)))))
+		)))
 
-#+nil
+
 (progn
   (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
@@ -199,9 +197,12 @@
 		   (block
 		    (setf  q (+ 1 2 3)
 			   l (+ 1 2 3))
-		   #+nil  (if (< q l)
-			 (+= m (* 2 3 4))
-			 (+= m (- 2 3 4))))
+		     (block
+			 (if (== a b)
+			     (+ a b)
+			     (- a b))
+		       (if (< b q)
+			   (*= b q))))
 		   (setf b (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39))))))
 		  ))))
  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
