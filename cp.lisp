@@ -85,9 +85,15 @@
 	 (let (destructuring-bind (bindings &rest rest) (cdr code)
 		(emit-cpp :code `(block
 				     (decl ,bindings)
-				   ,@rest))
-		#+nil
-		(emit-cpp :code `(,(emit-cpp :code `(decl ,bindings)) ,rest))))
+				   ,@rest))))
+	 (if (destructuring-bind (condition true-clause &optional false-clause) (cdr code)
+	       (with-output-to-string (s)
+		 (format s "if (~a) ~a"
+			 (emit-cpp :code condition)
+			 (emit-cpp :code `(block ,true-clause)))
+		 (when false-clause
+		  (format s "else ~a"
+			  (emit-cpp :code `(block ,false-clause)))))))
 	 (setf (with-output-to-string (s)
 		 (let ((args (cdr code)))
 		  (loop for i below (- (length args) 2) by 2 do
@@ -116,8 +122,10 @@
 		      (format s " :~{ ~a~^,~}" base-clause))
 		    (format s "{~{~a~%~}~%}~%" (loop for e in member-specification collect
 						    (emit-cpp :code e))))))
-		  ((member (car code) *computed-assignment-operator-symbol*)
-		   ;; handle computed assignment
+		  ((member (car code) (append *computed-assignment-operator-symbol*
+					      *logical-operator-symbol*))
+		   ;; handle computed assignment, i.e. +=, /=, ...
+		   ;; also logical operators, i.e. ==, &&, ...
 		   (format str "~a ~a ~a"
 			   (emit-cpp :code (second code))
 			   (car code) ;; assignment operator
@@ -150,9 +158,9 @@
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
     (emit-cpp :str s :code
 	      '(with-compilation-unit
-		(let ((i :type int))
-		  (setf i (+ f d))
-		  (+= i 32)))))
+		(if (== a b)
+		    (+ a b)
+		    (- a b)))))
 
 #+nil
 (progn

@@ -80,6 +80,9 @@ a = b; c = d
 computed assignemnt a b
 a += b
 
+logical operator ==
+a == b
+
 block (a b c)
 {
  a;
@@ -90,3 +93,10 @@ block (a b c)
 decl ((name :type type :init 0) ( .. ) (.. ) .. )
 
 type name = 0;
+
+
+let 
+just like lisp, expands into block with decl inside
+
+if cond yes [no]
+
