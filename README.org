@@ -100,3 +100,8 @@ just like lisp, expands into block with decl inside
 
 if cond yes [no]
 
+for
+(for ((i a :type int) (< i n) (+= i 1)))
+for(int i=a;i<n;i+=1)
+
+i only allow one variable initialization

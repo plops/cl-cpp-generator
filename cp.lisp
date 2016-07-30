@@ -86,6 +86,15 @@
 		(emit-cpp :code `(block
 				     (decl ,bindings)
 				   ,@rest))))
+	 (for (destructuring-bind (initial condition update &rest rest) (cdr code)
+		  (format str "for(~a; ~a; ~a) ~a"
+			  (if initial
+			      (destructuring-bind (name init &key (type 'auto)) initial
+				(format nil "~a ~a = ~a" type name (emit-cpp :code init)))
+			      "")
+			  (emit-cpp :code condition)
+			  (emit-cpp :code update)
+			  (emit-cpp :code `(block ,@rest)))))
 	 (if (destructuring-bind (condition true-clause &optional false-clause) (cdr code)
 	       (with-output-to-string (s)
 		 (format s "if (~a) ~a"
@@ -95,6 +104,8 @@
 		  (format s "else ~a"
 			  (emit-cpp :code `(block ,false-clause)))))))
 	 (setf (with-output-to-string (s)
+		 ;; handle multiple assignments
+		 ;; adds semicolons
 		 (let ((args (cdr code)))
 		  (loop for i below (length args) by 2 do
 		       (format s "~a = ~a;"
@@ -158,12 +169,13 @@
 					       (realpart code) (imagpart code))))))))))
       ""))
 
-
 #+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
     (emit-cpp :str s :code
 	      '(with-compilation-unit
+		(for (i a :type int) (< i n) (+= i 1)
+		 (+= b q))
 		)))
 
 
@@ -209,7 +221,11 @@
 			     (- a b))
 		       (if (< b q)
 			   (*= b q))))
-		   (setf b (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39))))))
+		   (setf b (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39)))))
+		   (for (i a :type int) (< i n) (+= i 1)
+			(+= b q))
+		   (for () (< i n) (+= i 1)
+			(+= b q)))
 		  ))))
  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )

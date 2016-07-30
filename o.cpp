@@ -53,6 +53,13 @@ complex double ::blub g(char a, int *b) {
   }
 
   b = ((3 / (32 + 3)) * 2 * 3 * (2 + (13 / (2 + 39))));
+  for (int i = a; i < n; i += 1;) {
+    b += q;
+  }
+
+  for (; i < n; i += 1;) {
+    b += q;
+  }
 }
 }
 ;
