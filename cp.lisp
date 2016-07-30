@@ -96,17 +96,14 @@
 			  (emit-cpp :code `(block ,false-clause)))))))
 	 (setf (with-output-to-string (s)
 		 (let ((args (cdr code)))
-		  (loop for i below (- (length args) 2) by 2 do
+		  (loop for i below (length args) by 2 do
 		       (format s "~a = ~a;"
 			       (emit-cpp :code (elt args i))
-			       (emit-cpp :code (elt args (1+ i)))))
-		  (format s "~a = ~a"
-			       (emit-cpp :code (elt args (- (length args) 2)))
-			       (emit-cpp :code (elt args (- (length args) 1)))))
-		 ))
+			       (emit-cpp :code (elt args (1+ i))))))))
 	 
 	 (t (cond ((member (car code) *binary-operator-symbol*)
 		   ;; handle binary operators
+		   ;; no semicolon
 		   (with-output-to-string (s)
 		     (format s "(")
 		     (loop for e in (cdr code)
@@ -115,6 +112,7 @@
 		     (format s "~a)" (emit-cpp :code (car (last (cdr code)))))))
 		  ((member (car code) *class-key*)
 		   ;; handle class, struct or union definitions
+		   ;; no semicolon
 		   (destructuring-bind (class-key identifier base-clause &rest member-specification) code
 		  (with-output-to-string (s)
 		    (format s "~a ~a " class-key identifier)
@@ -122,14 +120,22 @@
 		      (format s " :~{ ~a~^,~}" base-clause))
 		    (format s "{~{~a~%~}~%}~%" (loop for e in member-specification collect
 						    (emit-cpp :code e))))))
-		  ((member (car code) (append *computed-assignment-operator-symbol*
-					      *logical-operator-symbol*))
+		  ((member (car code) *computed-assignment-operator-symbol*)
 		   ;; handle computed assignment, i.e. +=, /=, ...
-		   ;; also logical operators, i.e. ==, &&, ...
-		   (format str "~a ~a ~a"
-			   (emit-cpp :code (second code))
-			   (car code) ;; assignment operator
-			   (emit-cpp :code (third code))))
+		   ;; this ends statement with semicolon
+		   (destructuring-bind (op lvalue rvalue) code
+		    (format str "~a ~a ~a;"
+			    (emit-cpp :code lvalue)
+			    op
+			    (emit-cpp :code rvalue))))
+		  ((member (car code)  *logical-operator-symbol*)
+		   ;; handle logical operators, i.e. ==, &&, ...
+		   ;; no semicolon
+		   (destructuring-bind (op left right) code
+		    (format str "~a ~a ~a"
+			    (emit-cpp :code left)
+			    op
+			    (emit-cpp :code right))))
 		  (t (format nil "not processable: ~a" code)))))
        (cond
 	 ((symbolp code)
