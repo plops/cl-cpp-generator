@@ -122,9 +122,11 @@
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
 					       '(setf)))
+		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for))
-		 (subseq code 1))
+		((member (second code) '(if for compound-statement decl))
+		 ;; if for, .. don't need semicolon
+		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
 	 
 	 (t (cond ((member (car code) *binary-operator-symbol*)
