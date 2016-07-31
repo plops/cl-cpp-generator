@@ -49,7 +49,7 @@
 	 (compound-statement (with-output-to-string (s)
 		  (format s "{~%")
 		  (loop for e in (cdr code) do
-		       (format s "  ~a~%"  (emit-cpp :code e)))
+		       (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
 		  (format s "~%}~%")))
 	 (function (destructuring-bind (name params ret &rest rest) (cdr code)
 		     (concatenate 'string
@@ -86,16 +86,20 @@
 		(emit-cpp :code `(compound-statement
 				     (decl ,bindings)
 				   ,@rest))))
-	 (for (destructuring-bind ((for-init-statement &optional condition update-expression) &rest statement-list)
+	 (for (destructuring-bind ((for-init-statement &optional condition-opt update-expression-opt) &rest statement-list)
 		  (cdr code)
 		(format str "for(~a; ~a; ~a) ~a"
 			(if for-init-statement
 			    (destructuring-bind (name init &key (type 'auto)) for-init-statement
 			      (format nil "~a ~a = ~a" type name (emit-cpp :code init)))
 			    "")
-			(emit-cpp :code condition-opt)
-			(emit-cpp :code update)
-			(emit-cpp :code `(compound-statement ,@rest)))))
+			(if condition-opt
+			    (emit-cpp :code condition-opt)
+			    "")
+			(if update-expression-opt
+			    (emit-cpp :code update-expression-opt)
+			    "")
+			(emit-cpp :code `(compound-statement ,@statement-list)))))
 	 (if (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
 	       (with-output-to-string (s)
 		 (format s "if (~a) ~a"
@@ -109,9 +113,19 @@
 		 ;; adds semicolons
 		 (let ((args (cdr code)))
 		  (loop for i below (length args) by 2 do
-		       (format s "~a = ~a;"
+		       (format s "~a = ~a"
 			       (emit-cpp :code (elt args i))
 			       (emit-cpp :code (elt args (1+ i))))))))
+
+	 (statement ;; add semicolon
+	  (cond ((member (second code) (append *binary-operator-symbol*
+					       *computed-assignment-operator-symbol*
+					       *logical-operator-symbol*
+					       '(setf)))
+		 (format str "~a;" (emit-cpp :code (cdr code))))
+		((member (second code) '(if for))
+		 (subseq code 1))
+		(t (format nil "not processable statement: ~a" code))))
 	 
 	 (t (cond ((member (car code) *binary-operator-symbol*)
 		   ;; handle binary operators
@@ -136,7 +150,7 @@
 		   ;; handle computed assignment, i.e. +=, /=, ...
 		   ;; this ends statement with semicolon
 		   (destructuring-bind (op lvalue rvalue) code
-		    (format str "~a ~a ~a;"
+		    (format str "~a ~a ~a"
 			    (emit-cpp :code lvalue)
 			    op
 			    (emit-cpp :code rvalue))))
@@ -150,7 +164,7 @@
 			    (emit-cpp :code right))))
 		  (t (format nil "not processable: ~a" code)))))
        (cond
-	 ((symbolp code)
+	 ((symbolp code) ;; print variable
 	  (format str "~a" code))
 	 ((numberp code) ;; print constants
 	      (cond ((integerp code) (format str "~a" code))
@@ -169,13 +183,12 @@
 				       (format nil "((~,18e) + (~,18ei))"
 					       (realpart code) (imagpart code))))))))))
       ""))
-
 #+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
     (emit-cpp :str s :code
 	      '(with-compilation-unit
-		(for (i a :type int) (< i n) (+= i 1)
+		(for ((i a :type int) (< i n) (+= i 1))
 		 (+= b q))
 		)))
 
@@ -223,9 +236,9 @@
 		       (if (< b q)
 			   (*= b q))))
 		   (setf b (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39)))))
-		   (for (i a :type int) (< i n) (+= i 1)
+		   (for ((i a :type int) (< i n) (+= i 1))
 			(+= b q))
-		   (for () (< i n) (+= i 1)
+		   (for (() (< i n) (+= i 1))
 			(+= b q)))
 		  ))))
  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
