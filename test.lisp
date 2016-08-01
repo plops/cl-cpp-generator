@@ -135,17 +135,18 @@ j = (3 - j);
 	 (with-namespace N
 	   (class "gug::senso" ()
 	    (access-specifier public)
-	    (function f ((a :type int)) int)
-	    (function h ((a :type int)) int)
+	    (function (f ((a :type int)) int))
+	    (function (h ((a :type int)) int))
 	    (access-specifier private)
-	    (function f2 ((a :type int)) int)
-	    (function h2 ((a :type int)) int)
+	    (function (f2
+		       ((a :type int)) int))
+	    (function (h2 ((a :type int)) int))
 	    (decl ((i :type int)
 		   (resetBus :type "Reset::BusCb"))))
 	   (class sensor ("public p::pipeline"
 			  "virtual public qqw::q"
 			  "virtual public qq::q")
-	    (function sensor ((a :type char)) ())
+	    (function (sensor ((a :type char))))
 	    (decl ((j :type int))))
 	   (union "lag::sensor2" ("private p::pipeline2")
 	    (decl ((j :type int)
@@ -200,8 +201,8 @@ float f;
 
 
 (progn ;; function definition
- (test '(function g ((a :type char)
-		     (b :type int*)) "complex double::blub"
+  (test '(function (g ((a :type char)
+		       (b :type int*)) "complex double::blub")
 	 (decl ((q :init b)))
 	 (setf  "blub::q" (+ 1 2 3)
 	  l (+ 1 2 3)))

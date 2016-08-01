@@ -51,7 +51,7 @@
 		  (loop for e in (cdr code) do
 		       (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
 		  (format s "}~%")))
-	 (function (destructuring-bind (name params ret &rest function-body) (cdr code)
+	 (function (destructuring-bind ((name params &optional ret ctor-initializer-list) &rest function-body) (cdr code)
 		     (let ((header (if ret
 				       (format nil "~a ~a(~{~a~^,~})"
 					       ret
@@ -203,11 +203,11 @@
 		(with-namespace N
 		   (class "gug::senso" ()
 		   (access-specifier public)
-		   (function f ((a :type int)) int)
-		   (function h ((a :type int)) int)
+		    (function (f ((a :type int)) int))
+		    (function (h ((a :type int)) int))
 		   (access-specifier private)
-		   (function "senso" ((a :type int)) ())
-		   (function h2 ((a :type int)) int))
+		    (function ("senso" ((a :type int))))
+		    (function (h2 ((a :type int)) int)))
 		  (class sensor ("public p::pipeline"
 				 "virtual public qqw::q"
 				 "virtual public qq::q"))
@@ -224,8 +224,8 @@
 			(z :type "complex float" :init #.(complex 2s0 1s0))
 			(w :type "complex double" :init #.(complex 2d0 1d0)))
 		    (setf i (+ f d)))
-		  (function g ((a :type char)
-		  	       (b :type int*)) "complex double::blub"
+		  (function (g ((a :type char)
+				(b :type int*)) "complex double::blub")
 		   (compound-statement
 		    (setf  q (+ 1 2 3)
 			   l (+ 1 2 3))
