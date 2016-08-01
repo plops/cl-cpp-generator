@@ -110,18 +110,16 @@
 			  (emit-cpp :code `(compound-statement ,false-statement)))))))
 	 (setf (with-output-to-string (s)
 		 ;; handle multiple assignments
-		 ;; adds semicolons
 		 (let ((args (cdr code)))
-		  (loop for i below (length args) by 2 do
-		       (format s "~a = ~a"
-			       (emit-cpp :code (elt args i))
-			       (emit-cpp :code (elt args (1+ i))))))))
+		   (loop for i below (length args) by 2 do
+			(format s "~a~%"
+			 (emit-cpp :code `(statement = ,(elt args i) ,(elt args (1+ i)))))))))
 
 	 (statement ;; add semicolon
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(setf)))
+					       '(setf =)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
 		((member (second code) '(if for compound-statement decl))
@@ -148,9 +146,8 @@
 		      (format s " :~{ ~a~^,~}" base-clause))
 		    (format s "{~{~a~%~}~%}~%" (loop for e in member-specification collect
 						    (emit-cpp :code e))))))
-		  ((member (car code) *computed-assignment-operator-symbol*)
-		   ;; handle computed assignment, i.e. +=, /=, ...
-		   ;; this ends statement with semicolon
+		  ((member (car code) (append '(=) *computed-assignment-operator-symbol*))
+		   ;; handle assignment and computed assignment, i.e. =, +=, /=, ...
 		   (destructuring-bind (op lvalue rvalue) code
 		    (format str "~a ~a ~a"
 			    (emit-cpp :code lvalue)
@@ -158,7 +155,6 @@
 			    (emit-cpp :code rvalue))))
 		  ((member (car code)  *logical-operator-symbol*)
 		   ;; handle logical operators, i.e. ==, &&, ...
-		   ;; no semicolon
 		   (destructuring-bind (op left right) code
 		    (format str "~a ~a ~a"
 			    (emit-cpp :code left)
