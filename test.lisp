@@ -128,35 +128,36 @@ j = (3 - j);
 (progn ;; computed assignment with complicated variable
   (test '(+= "a::b" 3) "a::b += 3"))
 
-(test '(with-compilation-unit
-		(include <stdio.h>)
-		(include "bla.h")
-		(with-namespace N
-		   (class "gug::senso" ()
-		    (access-specifier public)
-		   (functiond f ((a :type int)) int)
-		   (functiond h ((a :type int)) int)
-		   (access-specifier private)
-		    (functiond f2 ((a :type int)) int)
-		    (functiond h2 ((a :type int)) int)
-		    (decl ((i :type int)
-			   (resetBus :type "Reset::BusCb"))))
-		  (class sensor ("public p::pipeline"
-				 "virtual public qqw::q"
-				 "virtual public qq::q")
-		   (constructord sensor ((a :type char)))
-		   (decl ((j :type int))))
-		  (union "lag::sensor2" ("private p::pipeline2")
-		   (decl ((j :type int)
-			  (f :type float))))
-		  (struct "lag::sensor2" ("private p::pipeline2")
-		   (access-specifier public)
-		   (decl ((j :type int)
-			  (f :type float))))
+(progn ;; class, struct and union; function declaration
+ (test '(with-compilation-unit
+	 (include <stdio.h>)
+	 (include "bla.h")
+	 (with-namespace N
+	   (class "gug::senso" ()
+	    (access-specifier public)
+	    (functiond f ((a :type int)) int)
+	    (functiond h ((a :type int)) int)
+	    (access-specifier private)
+	    (functiond f2 ((a :type int)) int)
+	    (functiond h2 ((a :type int)) int)
+	    (decl ((i :type int)
+		   (resetBus :type "Reset::BusCb"))))
+	   (class sensor ("public p::pipeline"
+			  "virtual public qqw::q"
+			  "virtual public qq::q")
+	    (constructord sensor ((a :type char)))
+	    (decl ((j :type int))))
+	   (union "lag::sensor2" ("private p::pipeline2")
+	    (decl ((j :type int)
+		   (f :type float))))
+	   (struct "lag::sensor2" ("private p::pipeline2")
+	    (access-specifier public)
+	    (decl ((j :type int)
+		   (f :type float))))
 		  
 		  
-		  ))
-      "#include <stdio.h>
+	   ))
+       "#include <stdio.h>
 #include \"bla.h\"
 namespace N {
 class gug::senso {
@@ -195,26 +196,28 @@ float f;
 
  };
 
-")
+"))
 
+
+(progn ;; function definition
+ (test '(function g ((a :type char)
+		     (b :type int*)) "complex double::blub"
+	 (decl ((q :init b)))
+	 (setf  "blub::q" (+ 1 2 3)
+	  l (+ 1 2 3)))
+       "complex double::blub g(char a,int* b){
+  auto q = b;
+
+  blub::q = (1 + 2 + 3);
+l = (1 + 2 + 3);
+
+}
+"))
+
+#+nil
 (emit-cpp :str nil :code  )
 
-(function g ((a :type char)
-		  	       (b :type int*)) "complex double::blub"
-		   (compound-statement
-		    (setf  q (+ 1 2 3)
-			   l (+ 1 2 3))
-		     (compound-statement
-			 (if (== a b)
-			     (+ a b)
-			     (- a b))
-		       (if (< b q)
-			   (*= b q))))
-		   (setf b (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39)))))
-		   (for ((i a :type int) (< i n) (+= i 1))
-			(+= b q))
-		   (for (() (< i n) (+= i 1))
-			(+= b q)))
+
 
 (sb-cover:report "/home/martin/stage/cl-cpp-generator/cover/")
 
