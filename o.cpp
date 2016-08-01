@@ -1,6 +1,6 @@
 #include "bla.h"
 #include <stdio.h>
-namespace N {
+namespace n {
 class gug::senso {
 public:
   int f(int a);
