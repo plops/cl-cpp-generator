@@ -1,6 +1,6 @@
 #include "bla.h"
 #include <stdio.h>
-namespace n {
+namespace N {
 class gug::senso {
 public:
   int f(int a);
@@ -9,7 +9,6 @@ public:
 private:
   int f2(int a);
   int h2(int a);
-
 }
 
 class sensor : public p::pipeline,
@@ -36,11 +35,12 @@ i = (f + d);
 
 complex double ::blub g(char a, int *b) {
   {
-    q = (1 + 2 + 3)l = (1 + 2 + 3);
+    q = (1 + 2 + 3);
+    l = (1 + 2 + 3);
+
     {
       if (a == b) {
         (a + b);
-
       } else {
         (a - b);
       }
@@ -52,6 +52,7 @@ complex double ::blub g(char a, int *b) {
   }
 
   b = ((3 / (32 + 3)) * 2 * 3 * (2 + (13 / (2 + 39))));
+
   for (int i = a; i < n; i += 1) {
     b += q;
   }

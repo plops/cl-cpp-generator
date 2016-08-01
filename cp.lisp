@@ -51,10 +51,13 @@
 		  (loop for e in (cdr code) do
 		       (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
 		  (format s "}~%")))
-	 (function (destructuring-bind (name params ret &rest rest) (cdr code)
-		     (concatenate 'string
-				  (emit-function-header str name params ret)
-				  (emit-cpp :code `(compound-statement ,@rest)))))
+	 (function (destructuring-bind (name params ret &rest function-body) (cdr code)
+		     (if function-body
+			 (concatenate 'string
+				      (emit-function-header str name params ret)
+				      (emit-cpp :code `(compound-statement ,@function-body)))
+			 (concatenate 'string (emit-function-header str name params ret)
+				      ";"))))
 	 (functiond (destructuring-bind (name params ret) (cdr code)
 		      (concatenate 'string
 				   (emit-function-header str name params ret)
@@ -190,7 +193,7 @@
 		 (+= b q))
 		)))
 
-#+nil
+
 (progn
   (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
@@ -201,8 +204,8 @@
 		(with-namespace N
 		   (class "gug::senso" ()
 		   (access-specifier public)
-		   (functiond f ((a :type int)) int)
-		   (functiond h ((a :type int)) int)
+		   (function f ((a :type int)) int)
+		   (function h ((a :type int)) int)
 		   (access-specifier private)
 		   (functiond f2 ((a :type int)) int)
 		   (functiond h2 ((a :type int)) int))
