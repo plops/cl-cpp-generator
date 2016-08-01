@@ -135,17 +135,17 @@ j = (3 - j);
 	 (with-namespace N
 	   (class "gug::senso" ()
 	    (access-specifier public)
-	    (functiond f ((a :type int)) int)
-	    (functiond h ((a :type int)) int)
+	    (function f ((a :type int)) int)
+	    (function h ((a :type int)) int)
 	    (access-specifier private)
-	    (functiond f2 ((a :type int)) int)
-	    (functiond h2 ((a :type int)) int)
+	    (function f2 ((a :type int)) int)
+	    (function h2 ((a :type int)) int)
 	    (decl ((i :type int)
 		   (resetBus :type "Reset::BusCb"))))
 	   (class sensor ("public p::pipeline"
 			  "virtual public qqw::q"
 			  "virtual public qq::q")
-	    (constructord sensor ((a :type char)))
+	    (function sensor ((a :type char)) ())
 	    (decl ((j :type int))))
 	   (union "lag::sensor2" ("private p::pipeline2")
 	    (decl ((j :type int)

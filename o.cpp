@@ -7,7 +7,7 @@ public:
   int h(int a);
 
 private:
-  int f2(int a);
+  senso(int a);
   int h2(int a);
 }
 

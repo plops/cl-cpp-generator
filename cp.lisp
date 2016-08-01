@@ -52,20 +52,19 @@
 		       (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
 		  (format s "}~%")))
 	 (function (destructuring-bind (name params ret &rest function-body) (cdr code)
-		     (if function-body
-			 (concatenate 'string
-				      (emit-function-header str name params ret)
-				      (emit-cpp :code `(compound-statement ,@function-body)))
-			 (concatenate 'string (emit-function-header str name params ret)
-				      ";"))))
-	 (functiond (destructuring-bind (name params ret) (cdr code)
-		      (concatenate 'string
-				   (emit-function-header str name params ret)
-				   ";")))
-	 (constructord (destructuring-bind (name params) (cdr code)
-			 (format str "~a(~{~a~^,~});"
-				 name
-				 (emit-cpp :code `(:params ,params)))))
+		     (let ((header (if ret
+				       (format nil "~a ~a(~{~a~^,~})"
+					       ret
+					       name
+					       (emit-cpp :code `(:params ,params)))
+				       (format nil "~a(~{~a~^,~})"
+					       name
+					       (emit-cpp :code `(:params ,params))))))
+		       (if function-body
+			   (concatenate 'string
+					header
+					(emit-cpp :code `(compound-statement ,@function-body)))
+			   (concatenate 'string header ";")))))
 	 (access-specifier (format str "~a:~%" (cadr code))
 			   ;; public, private or protected
 			   )
@@ -207,8 +206,8 @@
 		   (function f ((a :type int)) int)
 		   (function h ((a :type int)) int)
 		   (access-specifier private)
-		   (functiond f2 ((a :type int)) int)
-		   (functiond h2 ((a :type int)) int))
+		   (function "senso" ((a :type int)) ())
+		   (function h2 ((a :type int)) int))
 		  (class sensor ("public p::pipeline"
 				 "virtual public qqw::q"
 				 "virtual public qq::q"))
