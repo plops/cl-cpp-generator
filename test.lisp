@@ -125,7 +125,10 @@ j = (3 - j);
 ")
   )
 
-(emit-cpp :str nil :code  )
+(progn ;; computed assignment with complicated variable
+ (test '(+= "a::b" 3) "a::b += 3"))
+
+(emit-cpp :str nil :code  '(+= "a::b" 3))
 
 (sb-cover:report "/home/martin/stage/cl-cpp-generator/cover/")
 

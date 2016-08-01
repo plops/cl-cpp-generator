@@ -162,7 +162,8 @@
 			    (emit-cpp :code right))))
 		  (t (format nil "not processable: ~a" code)))))
        (cond
-	 ((symbolp code) ;; print variable
+	 ((or (symbolp code)
+	      (stringp code)) ;; print variable
 	  (format str "~a" code))
 	 ((numberp code) ;; print constants
 	      (cond ((integerp code) (format str "~a" code))
