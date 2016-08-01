@@ -213,10 +213,27 @@ float f;
 l = (1 + 2 + 3);
 
 }
+")
+  ;; constructor with initializers
+  (test '(function (bla ((a :type char)
+				  (b :type int*)) ()
+				  ((a 3)
+				   (sendToSensorCb sendToSensorCb_)))
+		   (+= a b)
+	  )
+	"bla(char a,int* b): a( 3 ), sendToSensorCb( sendToSensorCb_ )
+{
+  a += b;
+}
 "))
 
 #+nil
-(emit-cpp :str nil :code  )
+(emit-cpp :str nil :code  '(function (bla ((a :type char)
+				  (b :type int*)) ()
+				  ((a 3)
+				   (sendToSensorCb sendToSensorCb_)))
+		   (+= a b)
+		   ))
 
 
 

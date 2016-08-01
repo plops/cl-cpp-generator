@@ -56,7 +56,11 @@
 						(when ret (format nil "~a " ret))
 						(format nil "~a(~{~a~^,~})"
 							name
-							(emit-cpp :code `(:params ,params))))))
+							(emit-cpp :code `(:params ,params)))
+						(when ctor-initializer-list
+						  (format nil ":~{~a~^,~}~%"
+							  (loop for (e f) in ctor-initializer-list collect
+							       (format nil " ~a( ~a )" e f)))))))
 		       (if function-body
 			   (concatenate 'string
 					header
@@ -189,7 +193,7 @@
 		 (+= b q))
 		)))
 
-
+#+nil
 (progn
   (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
@@ -237,8 +241,14 @@
 			(+= b q))
 		   (for (() (< i n) (+= i 1))
 			(+= b q)))
+		  (function (bla ((a :type char)
+				  (b :type int*)) ()
+				  ((a 3)
+				   (sendToSensorCb sendToSensorCb_)))
+		   (+= a b)
+		   )
 		  ))))
-  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
+;  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
 
 
