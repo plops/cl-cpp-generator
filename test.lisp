@@ -27,43 +27,57 @@
 	   (clang-format (emit-cpp :str nil :code code))
 	   (clang-format string))))
 
-(progn  ;; for loop
+(progn	;; for loop
   (test 
-   '(with-compilation-unit
-     (for ((i a :type int) (< i n) (+= i 1))
-      (+= b q)))
+   '(for ((i a :type int) (< i n) (+= i 1))
+     (+= b q))
    "for (int i = a; i < n; i += 1) {
 b += q;
 }
 ")
-
-
   (test 
-   '(with-compilation-unit
-     (for (() (< i n) (+= i 1))
-      (+= b q)))
+   '(for (() (< i n) (+= i 1))
+     (+= b q))
    "for (; i < n; i += 1) {
 b += q;
 }
 ")
-
   (test 
-   '(with-compilation-unit
-     (for ((i a :type int) () (+= i 1))
-      (+= b q)))
+   '(for ((i a :type int) () (+= i 1))
+     (+= b q))
    "for (int i = a; ; i += 1) {
 b += q;
 }
 ")
-
   (test 
-   '(with-compilation-unit
-     (for ((i a :type int) (< i n) ())
-      (+= b q)))
+   '(for ((i a :type int) (< i n) ())
+     (+= b q))
    "for (int i = a; i < n;) {
 b += q;
 }
 "))
+
+(progn ;; if
+  (test
+   '(if (== a b) (+= a b) (-= a b))
+   "if (a == b) {
+  a += b;
+
+}
+else {
+  a -= b;
+
+}
+")
+  (test
+   '(if (== a b) (+= a b))
+   "if (a == b) {
+  a += b;
+
+}
+"))
+
+(emit-cpp :str nil :code '(if (== a b) (+= a b)))
 
 (sb-cover:report "/home/martin/stage/cl-cpp-generator/cover/")
 
