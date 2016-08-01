@@ -102,12 +102,30 @@ complex float z = ((2.0000000000f+0) + (1.0000000000f+0i));
 complex double w = ((2.000000000000000000e+0) + (1.000000000000000000e+0i));
 "))
 
-(emit-cpp :str nil :code '(let ((i :type int :init 0)
+(progn ;; let
+  (test '(let ((i :type int :init 0)
 			(f :type float :init 3.2s-7)
 			(d :type double :init 7.2d-31)
 			(z :type "complex float" :init #.(complex 2s0 1s0))
 			(w :type "complex double" :init #.(complex 2d0 1d0)))
-		    (setf i (+ f d))) )
+			   (setf i (+ f d) j (- 3 j))
+	  (+= j (+ 32 q)))
+	"{
+  int i = 0;
+float f = (3.2000000000f-7);
+double d = (7.200000000000000000e-31);
+complex float z = ((2.0000000000f+0) + (1.0000000000f+0i));
+complex double w = ((2.000000000000000000e+0) + (1.000000000000000000e+0i));
+
+  i = (f + d);
+j = (3 - j);
+
+  j += (32 + q);
+}
+")
+  )
+
+(emit-cpp :str nil :code  )
 
 (sb-cover:report "/home/martin/stage/cl-cpp-generator/cover/")
 
