@@ -187,14 +187,14 @@
       ""))
 #+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
-		     :direction :output :if-exists :supersede :if-does-not-exist :create)
-    (emit-cpp :str s :code
+		   :direction :output :if-exists :supersede :if-does-not-exist :create)
+  (emit-cpp :str s :code
 	      '(with-compilation-unit
 		(for ((i a :type int) (< i n) (+= i 1))
 		 (+= b q))
 		)))
 
-
+#+nil
 (progn
   (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
@@ -243,7 +243,7 @@
 		   (for (() (< i n) (+= i 1))
 			(+= b q)))
 		  ))))
- (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
+  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
 
 
