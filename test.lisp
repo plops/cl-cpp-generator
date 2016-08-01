@@ -1,11 +1,10 @@
 ;; http://www.sbcl.org/manual/ 16.3 sb-cover
-(eval-when (:compile-toplevel)
-  (require :sb-cover)
+(require :sb-cover)
 
-  (declaim (optimize sb-cover:store-coverage-data))
+(declaim (optimize sb-cover:store-coverage-data))
 
-  (compile-file "cp.lisp")
-  (load "cp.fasl"))
+(compile-file "cp.lisp")
+(load "cp.fasl")
 
 (in-package :g)
 
@@ -55,6 +54,13 @@ b += q;
    "for (int i = a; i < n;) {
 b += q;
 }
+")
+  (test 
+   '(for ((i a) (< i n) ())
+     (+= b q))
+   "for (auto i = a; i < n;) {
+b += q;
+}
 "))
 
 (progn ;; if
@@ -62,18 +68,15 @@ b += q;
    '(if (== a b) (+= a b) (-= a b))
    "if (a == b) {
   a += b;
-
 }
 else {
   a -= b;
-
 }
 ")
   (test
    '(if (== a b) (+= a b))
    "if (a == b) {
   a += b;
-
 }
 "))
 

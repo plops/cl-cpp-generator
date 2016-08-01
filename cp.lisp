@@ -50,7 +50,7 @@
 		  (format s "{~%")
 		  (loop for e in (cdr code) do
 		       (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
-		  (format s "~%}~%")))
+		  (format s "}~%")))
 	 (function (destructuring-bind (name params ret &rest rest) (cdr code)
 		     (concatenate 'string
 				  (emit-function-header str name params ret)
