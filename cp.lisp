@@ -116,13 +116,15 @@
 		 (let ((args (cdr code)))
 		   (loop for i below (length args) by 2 do
 			(format s "~a~%"
-			 (emit-cpp :code `(statement = ,(elt args i) ,(elt args (1+ i)))))))))
+				(emit-cpp :code `(statement = ,(elt args i) ,(elt args (1+ i)))))))))
+	 (return (format str "return ~a"
+			 (emit-cpp :code (second code))))
 
 	 (statement ;; add semicolon
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(=)))
+					       '(= return)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
 		((member (second code) '(if for compound-statement decl setf))
@@ -192,6 +194,24 @@
 		(for ((i a :type int) (< i n) (+= i 1))
 		 (+= b q))
 		)))
+
+(compile-cpp "/home/martin/stage/cl-cpp-generator/o.cpp"
+ '(with-compilation-unit
+	       (function (main ((argc :type int)
+				(argv :type "const char**"))
+			  int)
+		(for (() () ()))
+		(return 0))))
+
+(defun compile-cpp (fn code)
+ (with-open-file (s fn
+		    :direction :output :if-exists :supersede :if-does-not-exist :create)
+   (emit-cpp :str s :code code))
+ (sb-ext:run-program "/usr/bin/clang-format" `("-i" ,fn))
+ (sleep .1)
+ (sb-ext:run-program "/usr/bin/g++" `("-o" "o"  "-Os" ,fn))
+ (sleep .1)
+ (sb-ext:run-program "/usr/bin/objdump" `("-DS" "o")))
 
 #+nil
 (progn
