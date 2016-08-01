@@ -52,14 +52,11 @@
 		       (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
 		  (format s "}~%")))
 	 (function (destructuring-bind ((name params &optional ret ctor-initializer-list) &rest function-body) (cdr code)
-		     (let ((header (if ret
-				       (format nil "~a ~a(~{~a~^,~})"
-					       ret
-					       name
-					       (emit-cpp :code `(:params ,params)))
-				       (format nil "~a(~{~a~^,~})"
-					       name
-					       (emit-cpp :code `(:params ,params))))))
+		     (let ((header (concatenate 'string
+						(when ret (format nil "~a " ret))
+						(format nil "~a(~{~a~^,~})"
+							name
+							(emit-cpp :code `(:params ,params))))))
 		       (if function-body
 			   (concatenate 'string
 					header
