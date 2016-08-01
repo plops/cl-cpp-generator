@@ -113,12 +113,16 @@
 				(emit-cpp :code `(statement = ,(elt args i) ,(elt args (1+ i)))))))))
 	 (return (format str "return ~a"
 			 (emit-cpp :code (second code))))
+	 (funcall (destructuring-bind (name &rest rest) (cdr code)
+		      (format str "~a(~{~a~^,~})"
+			      (emit-cpp :code name)
+			      (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 
 	 (statement ;; add semicolon
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(= return)))
+					       '(= return funcall)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
 		((member (second code) '(if for compound-statement decl setf))
@@ -190,6 +194,7 @@
 		 (+= b q))
 		)))
 
+
 (compile-cpp "/home/martin/stage/cl-cpp-generator/o.cpp"
 	     '(with-compilation-unit
 	       (include <vector>)
@@ -200,7 +205,8 @@
 		(decl ((v :type "std::vector<int>")
 		       (max-vec-size :type "static const int" :init 256)))
 		
-		(for (() () ()))
+		(for ((i 0 :type int) (< i max-vec-size) (+= i 1))
+		 (funcall v.push-back i))
 		(return 0))))
 
 (defun compile-cpp (fn code)
