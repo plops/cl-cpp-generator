@@ -32,12 +32,6 @@
 #+nil
 (trace emit-cpp)
 
-(defun emit-function-header (str name params ret)
-  (format str "~a ~a(~{~a~^,~})"
-	  ret
-	  name
-	  (emit-cpp :code `(:params ,params))))
-
 (defun emit-cpp (&key code (str nil))
   (if code
       (if (listp code)
@@ -81,7 +75,7 @@
 		   (loop for e  in bindings do
 			(destructuring-bind (name &key (type 'auto) init) e
 			  (format s "~a ~a"
-				  type name)
+				  type (emit-cpp :code name))
 			  (if init
 			      (format s " = ~a" (emit-cpp :code init)))
 			  (format s ";~%"))))))
@@ -168,7 +162,7 @@
        (cond
 	 ((or (symbolp code)
 	      (stringp code)) ;; print variable
-	  (format str "~a" code))
+	  (substitute #\_ #\- (format nil "~a" code)))
 	 ((numberp code) ;; print constants
 	      (cond ((integerp code) (format str "~a" code))
 		    ((floatp code)
@@ -186,6 +180,7 @@
 				       (format nil "((~,18e) + (~,18ei))"
 					       (realpart code) (imagpart code))))))))))
       ""))
+
 #+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
 		   :direction :output :if-exists :supersede :if-does-not-exist :create)
@@ -196,10 +191,15 @@
 		)))
 
 (compile-cpp "/home/martin/stage/cl-cpp-generator/o.cpp"
- '(with-compilation-unit
+	     '(with-compilation-unit
+	       (include <vector>)
+	       (include <cstddef>)
 	       (function (main ((argc :type int)
 				(argv :type "const char**"))
 			  int)
+		(decl ((v :type "std::vector<int>")
+		       (max-vec-size :type "static const int" :init 256)))
+		
 		(for (() () ()))
 		(return 0))))
 
