@@ -138,13 +138,12 @@
 		     (format s "~a)" (emit-cpp :code (car (last (cdr code)))))))
 		  ((member (car code) *class-key*)
 		   ;; handle class, struct or union definitions
-		   ;; no semicolon
 		   (destructuring-bind (class-key identifier base-clause &rest member-specification) code
 		  (with-output-to-string (s)
 		    (format s "~a ~a " class-key identifier)
 		    (when base-clause
 		      (format s " :~{ ~a~^,~}" base-clause))
-		    (format s "{~{~a~%~}~%}~%" (loop for e in member-specification collect
+		    (format s "{~%~{~a~%~}}~%" (loop for e in member-specification collect
 						    (emit-cpp :code e))))))
 		  ((member (car code) (append '(=) *computed-assignment-operator-symbol*))
 		   ;; handle assignment and computed assignment, i.e. =, +=, /=, ...
