@@ -45,7 +45,11 @@
 				    (loop for e in (cdr code) collect 
 					 (emit-cmd :code e))))
 	    (raw (destructuring-bind (string) (cdr code)
-		(format nil "~a~%" string)))
+		   (format nil "~a~%" string)))
+	    (funcall (destructuring-bind (name &rest rest) (cdr code)
+		      (format nil "~a(~{~a~^,~})"
+			      (emit-cmd :code name)
+			      (mapcar #'(lambda (x) (emit-cmd :code x)) rest))))
 	    (sections (destructuring-bind (&rest rest) (cdr code)
 		      (with-output-to-string (s)
 			(format s "SECTIONS~%")
@@ -100,21 +104,30 @@
 				   (format s "~a~%" (emit-cmd :code `(memory-range ,name ,attr ,origin ,length ,fill)))))))
 	    (page-specifier (destructuring-bind (number) (cdr code)
 			      (format nil "PAGE ~A:" number)))
-	    (t (cond ((member (car code) *binary-operator-symbol*)
-		      ;; handle binary operators
-		      (with-output-to-string (s)
-			(format s "(")
-			(loop for e in (cdr code)
-			   and i below (1- (length (cdr code))) do
-			     (format s "~a ~a " (emit-cmd :code e) (car code)))
-			(format s "~a)" (emit-cmd :code (car (last (cdr code)))))))
-		     ((member (car code)  *logical-operator-symbol*)
-		      ;; handle logical operators, i.e. ==, &&, ...
+	    (t (cond
+		 ;; the following operations are supported: * / % + - , unary: - ~ !
+		 ((and (= 2 (length code)) (member (car code)  '(- ~ !)))
+		  ;; handle unary operators, i.e. - ~ !
+		  (destructuring-bind (op operand) code
+		    (format nil "(~a ~a)"
+			    op
+			    (emit-cmd :code operand))))
+		 ((member (car code) '(* / % + -))
+		  ;; handle binary operators
+		  (with-output-to-string (s)
+		    (format s "(")
+		    (loop for e in (cdr code)
+		       and i below (1- (length (cdr code))) do
+			 (format s "~a ~a " (emit-cmd :code e) (car code)))
+		    (format s "~a)" (emit-cmd :code (car (last (cdr code)))))))
+		 ((member (car code)  '(<< >> == = < <= > >= & |\|| && ||||))
+		  ;; handle logical operators, i.e. ==, &&, ...
 		      (destructuring-bind (op left right) code
-			(format str "~a ~a ~a"
+			(format nil "(~a ~a ~a)"
 				(emit-cmd :code left)
 				op
 				(emit-cmd :code right))))
+		     
 		     (t (format nil "not processable: ~a" code)))))
 	  (cond ((numberp code)
 		 (format nil "0x~x" code))
@@ -136,9 +149,9 @@
 		   (page-specifier 0)
 		   (memory-ranges
 		    (ZONE0 RW #x4000 #x1000 #xffffffff)
-		    (RAML0 () #x8000 (+ #x1000 BUFFER)))
+		    (RAML0 () #x8000 (+ #x1000 (&& BUFFER (~ 1)))))
 		   (page-specifier 1)
-		   (memory-range BOOT_RSVD () 0 #x50))))
+		   (memory-range BOOT_RSVD () (+ #x180 (funcall end RAML0 1)) #x50))))
 
 (defun emit-cpp (&key code (str nil))
   (if code
@@ -242,7 +255,14 @@
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
 	 
-	 (t (cond ((member (car code) *binary-operator-symbol*)
+	 (t (cond ((and (= 2 (length code)) (member (car code)  '(- ~ !)))
+		      ;; handle unary operators, i.e. - ~ !, this code
+		      ;; needs to be placed before binary - operator!
+		  (destructuring-bind (op operand) code
+		    (format nil "(~a ~a)"
+			    op
+			    (emit-cmd :code operand))))
+		  ((member (car code) *binary-operator-symbol*)
 		   ;; handle binary operators
 		   ;; no semicolon
 		   (with-output-to-string (s)
@@ -270,7 +290,7 @@
 		  ((member (car code)  *logical-operator-symbol*)
 		   ;; handle logical operators, i.e. ==, &&, ...
 		   (destructuring-bind (op left right) code
-		    (format str "~a ~a ~a"
+		    (format str "(~a ~a ~a)"
 			    (emit-cpp :code left)
 			    op
 			    (emit-cpp :code right))))
