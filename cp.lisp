@@ -39,10 +39,33 @@
   (if code
       (if (listp code)
 	  (case (car code)
+	    (sections (destructuring-bind (&rest rest) (cdr code)
+		      (with-output-to-string (s)
+			(format s "SECTIONS~%")
+			(write-sequence (emit-cmd :code `(compound-statement ,@rest)) s))))
+	    
+	    (section-block (destructuring-bind (name target &key page load run type load-start load-end run-start) (cdr code)
+			     (with-output-to-string (s)
+			       (format s "~a :" name)
+			       (when target
+				 (format s " ~a" target))
+			       (when page (format s " PAGE = ~a" page))
+			       (when load (format s " LOAD = ~a" load))
+			       (when run  (format s " RUN = ~a" run))
+			       (when type  (format s " TYPE = ~a" type))
+			       (when load-start  (format s " LOAD_START( ~a )" load-start))
+			       (when load-end  (format s " LOAD_END( ~a )" load-end))
+			       (when run-start  (format s " RUN_START( ~a )" run-start)))))
+	    (section-blocks (destructuring-bind (&rest rest) (cdr code)
+			     (with-output-to-string (s)
+			       (loop for (name target &key page load run type load-start load-end run-start) in rest do
+				    (format s "~a~%" (emit-cmd :code (list 'section-block name target :page page :load load :run run :type type
+										     :load-start load-start :load-end load-end :run-start run-start)))))))
 	    (memory (destructuring-bind (&rest rest) (cdr code)
 		      (with-output-to-string (s)
 			(format s "MEMORY~%")
 			(write-sequence (emit-cmd :code `(compound-statement ,@rest)) s))))
+	    
 	    (compound-statement (destructuring-bind (&rest lines) (cdr code)
 				    (with-output-to-string (s)
 				      (format s "{~%")
@@ -57,6 +80,12 @@
 				   (format s "~a~%" (emit-cmd :code `(memory-block ,name ,origin ,length)))))))
 	    (page-specifier (destructuring-bind (number) (cdr code)
 			      (format nil "PAGE ~A:" number)))))))
+
+#+nil
+(emit-cmd :code '(sections
+		  (section-blocks
+		   (.cinit ">  FLASHC" :page 0)
+		   (AppRamFuncs nil :load FLASHF :run RAML0 :load-start _RamfuncsLoadStart :load-end _RamfuncsLoadEnd :page 0))))
 
 #+nil
 (emit-cmd :code '(memory
