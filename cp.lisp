@@ -74,17 +74,21 @@
 				      (loop for e in lines do
 					   (format s "~a~%" (emit-cmd :code e)))
 				      (format s "}~%"))))
-	    (memory-range (destructuring-bind (name origin length &optional fill) (cdr code)
+	    (memory-range (destructuring-bind (name attr origin length &optional fill) (cdr code)
+			    ;; name .. max 64 chars A-Za-z$._
+			    ;; attr .. R W X I
 			    (with-output-to-string (s)
-			      (format s "~a : origin = ~a, length = ~a" name
+			      (format s "~a" name)
+			      (when attr (format s "( ~a )" attr))
+			      (format s " : origin = ~a, length = ~a"
 				      (emit-cmd :code origin)
 				      (emit-cmd :code length))
 			      (when fill
 			       (format s ", fill = ~a" fill)))))
 	    (memory-ranges (destructuring-bind (&rest rest) (cdr code)
 			     (with-output-to-string (s)
-			      (loop for (name origin length) in rest do
-				   (format s "~a~%" (emit-cmd :code `(memory-block ,name ,origin ,length)))))))
+			      (loop for (name attr origin length &optionall fill) in rest do
+				   (format s "~a~%" (emit-cmd :code `(memory-range ,name ,attr ,origin ,length ,fill)))))))
 	    (page-specifier (destructuring-bind (number) (cdr code)
 			      (format nil "PAGE ~A:" number))))
 	  (cond ((numberp code)
@@ -100,10 +104,10 @@
 (emit-cmd :code '(memory
 		  (page-specifier 0)
 		  (memory-ranges
-		   (ZONE0 #x4000 #x1000)
-		   (RAML0 #x8000 #x1000))
+		   (ZONE0 R #x4000 #x1000)
+		   (RAML0 () #x8000 #x1000))
 		  (page-specifier 1)
-		  (memory-range BOOT_RSVD 0 #x50)))
+		  (memory-range BOOT_RSVD () 0 #x50)))
 
 (defun emit-cpp (&key code (str nil))
   (if code
