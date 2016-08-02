@@ -47,6 +47,10 @@
 	    (raw (destructuring-bind (string) (cdr code)
 		   (format nil "~a~%" string)))
 	    (funcall (destructuring-bind (name &rest rest) (cdr code)
+		       ;; supported functions in memory range entries:
+		       ;; start(memory-range [, page=0])
+		       ;; size(memory-range [, page=0])
+		       ;; end(memory-range [, page=0])
 		      (format nil "~a(~{~a~^,~})"
 			      (emit-cmd :code name)
 			      (mapcar #'(lambda (x) (emit-cmd :code x)) rest))))
