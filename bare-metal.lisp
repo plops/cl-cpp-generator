@@ -59,3 +59,31 @@
 		(for ((i 0 :type int) (< i max-vec-size) (+= i 1))
 		 (funcall v.push-back i))
 		(return 0))))
+;; removing standard library and c++ runtime
+;; update interrupt vector table
+;; set up stack pointers for all modes of execution
+;; zero .bss section
+;; call initialisation functions for global objects
+;; call main
+;; perhaps define memcpy and memset
+
+
+(compile-cpp "/home/martin/stage/cl-cpp-generator/out/test_cpp_statics" ;; static objects
+	     '(with-compilation-unit
+	       (class SomeObj ()
+
+		(access-specifier public)
+		(function (instanceGlobal () "static SomeObj&"))
+		(function (instanceLocal () "static SomeObj&"))
+		(access-specifier private)
+		(function (SomeObj ((v1 :type int)
+					(v2 :type int))))
+		(decl ((m_v1 :type int)
+		       (m_v2 :type int)
+		       (GlobalObj :type "static SomeObj"))))
+
+	       (function (main ((argc :type int)
+				(argv :type "const char**"))
+			  int)
+		(for (() () ()))
+		(return 0))))
