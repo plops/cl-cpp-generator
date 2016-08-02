@@ -135,7 +135,8 @@ j = (3 - j);
 	 (with-namespace N
 	   (class "gug::senso" ()
 	    (access-specifier public)
-	    (function (f ((a :type int)) int))
+	    (function (f ((a :type int)) int :specifier const)
+		      (return i))
 	    (function (h ((a :type int)) int))
 	    (access-specifier private)
 	    (function (f2
@@ -164,7 +165,10 @@ namespace N {
 class gug::senso {
 public:
 
-int f(int a);
+int f(int a) const{
+  return i;
+}
+
 int h(int a);
 private:
 
@@ -227,13 +231,44 @@ l = (1 + 2 + 3);
 }
 "))
 
+(progn ;; function call
+  (test '(function (g ((a :type char)
+		       (b :type int*)) "complex double::blub")
+	 (funcall add a b))
+	"complex double ::blub g(char a, int *b) { add(a, b); }
+"))
+
 #+nil
-(emit-cpp :str nil :code  '(function (bla ((a :type char)
-				  (b :type int*)) ()
-				  ((a 3)
-				   (sendToSensorCb sendToSensorCb_)))
-		   (+= a b)
-		   ))
+(emit-cpp :str nil :code  '(with-compilation-unit
+	 (include <stdio.h>)
+	 (include "bla.h")
+	 (with-namespace N
+	   (class "gug::senso" ()
+	    (access-specifier public)
+	    (function (f ((a :type int)) int :specifier const)
+		      (return i))
+	    (function (h ((a :type int)) int))
+	    (access-specifier private)
+	    (function (f2
+		       ((a :type int)) int))
+	    (function (h2 ((a :type int)) int))
+	    (decl ((i :type int)
+		   (resetBus :type "Reset::BusCb"))))
+	   (class sensor ("public p::pipeline"
+			  "virtual public qqw::q"
+			  "virtual public qq::q")
+	    (function (sensor ((a :type char))))
+	    (decl ((j :type int))))
+	   (union "lag::sensor2" ("private p::pipeline2")
+	    (decl ((j :type int)
+		   (f :type float))))
+	   (struct "lag::sensor2" ("private p::pipeline2")
+	    (access-specifier public)
+	    (decl ((j :type int)
+		   (f :type float))))
+		  
+		  
+	   )))
 
 
 
