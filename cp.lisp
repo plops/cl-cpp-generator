@@ -55,6 +55,15 @@
 			      (emit-cmd :code name)
 			      (mapcar #'(lambda (x) (emit-cmd :code x)) rest))))
 	    (sections (destructuring-bind (&rest rest) (cdr code)
+			;; describe how inpt sections are combined
+			;; into output sections,
+			
+			;; define output sections in executable,
+			
+			;; control placement of sections relative to
+			;; each other and in entire memory
+			
+			;; rename output sections
 		      (with-output-to-string (s)
 			(format s "SECTIONS~%")
 			(write-sequence (emit-cmd :code `(compound-statement ,@rest)) s))))
