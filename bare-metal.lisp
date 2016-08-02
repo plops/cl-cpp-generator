@@ -69,6 +69,7 @@
 
 
 (compile-cpp "/home/martin/stage/cl-cpp-generator/out/test_cpp_statics" ;; static objects
+	     
 	     '(with-compilation-unit
 	       (class SomeObj ()
 
@@ -91,10 +92,23 @@
 					      (v2 :type int))
 			  () :ctor ((m_v1 v1) (m_v2 v2)))
 		(decl ((a :type int))))
+	       
 	       (function (main ((argc :type int)
 				(argv :type "const char**"))
 			  int)
 		(decl ((glob :type "auto&" :init "SomeObj::instanceGlobal()")
 		       (local :type "auto&" :init "SomeObj::instanceLocal()")))
 		(for (() () ()))
-		(return 0))))
+		(return 0))
+	       (raw "#pragma CODE_SECTION(\"AppRamFuncs\")")
+	       (function (_start () "extern \"C\" void")
+		       (funcall main 0 0)))
+	     
+	     ;; this code should be split into different files to
+	     ;; prevent inlining.  cxa_guard_acquire is used for
+	     ;; thread safe static variable initialization.  the
+	     ;; following flag turns this off. in that case make sure
+	     ;; not to access statics in the interrupt context,
+	     ;; btw. initialize objects in main() before enabling
+	     ;; interrupts
+	     :options '("-fno-threadsafe-statics"))

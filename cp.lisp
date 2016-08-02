@@ -119,6 +119,8 @@
 		      (format str "~a(~{~a~^,~})"
 			      (emit-cpp :code name)
 			      (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
+	 (raw (destructuring-bind (string) (cdr code)
+		(format str "~a" string)))
 
 	 (statement ;; add semicolon
 	  (cond ((member (second code) (append *binary-operator-symbol*
@@ -196,7 +198,7 @@
 		 (+= b q))
 		)))
 
-(defun compile-cpp (fn code)
+(defun compile-cpp (fn code &key options)
   (let ((source-fn (concatenate 'string fn ".cpp"))
 	(bin-fn (concatenate 'string fn ".bin")))
    (with-open-file (s source-fn
@@ -205,7 +207,7 @@
    (sb-ext:run-program "/usr/bin/clang-format" `("-i" ,source-fn))
    (sleep .1)
    (with-output-to-string (s)
-    (sb-ext:run-program "/usr/bin/g++" `("-fno-exceptions" "-nostdlib" "-fno-unwind-tables" "-fno-rtti" "-march=native" "-o" ,bin-fn  "-Os" ,source-fn)
+    (sb-ext:run-program "/usr/bin/g++" (append options `("-fno-exceptions" "-nostdlib" "-fno-unwind-tables" "-fno-rtti" "-march=native" "-o" ,bin-fn  "-Os" ,source-fn))
 			:output s :error :output))
 ;   (sleep .1)
 ;   (sb-ext:run-program "/usr/bin/objdump" `("-DS" ,bin-fn))
