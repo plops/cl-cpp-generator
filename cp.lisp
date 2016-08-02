@@ -32,6 +32,9 @@
 #+nil
 (trace emit-cpp)
 
+#+nil
+(trace emit-cmd)
+
 (defun emit-cmd (&key code)
   (if code
       (if (listp code)
@@ -44,19 +47,25 @@
 				    (with-output-to-string (s)
 				      (format s "{~%")
 				      (loop for e in lines do
-					   (format s "  ~a~%" (emit-cmd :code e)))
+					   (format s "~a~%" (emit-cmd :code e)))
 				      (format s "}~%"))))
-	    (block (destructuring-bind (name origin length) (cdr code)
-		     (format nil "~a : origin = 0x~8,'0x, length = 0x~8,'0x" name origin length)))
+	    (memory-block (destructuring-bind (name origin length) (cdr code)
+			    (format nil "~a : origin = 0x~8,'0x, length = 0x~8,'0x" name origin length)))
+	    (memory-blocks (destructuring-bind (&rest rest) (cdr code)
+			     (with-output-to-string (s)
+			      (loop for (name origin length) in rest do
+				   (format s "~a~%" (emit-cmd :code `(memory-block ,name ,origin ,length)))))))
 	    (page-specifier (destructuring-bind (number) (cdr code)
 			      (format nil "PAGE ~A:" number)))))))
 
+#+nil
 (emit-cmd :code '(memory
 		  (page-specifier 0)
-		  (block ZONE0 #x4000 #x1000)
-		  (block RAML0 #x8000 #x1000)
+		  (memory-blocks
+		   (ZONE0 #x4000 #x1000)
+		   (RAML0 #x8000 #x1000))
 		  (page-specifier 1)
-		  (block BOOT_RSVD 0 #x50)))
+		  (memory-block BOOT_RSVD 0 #x50)))
 
 (defun emit-cpp (&key code (str nil))
   (if code
