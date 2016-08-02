@@ -45,15 +45,17 @@
 		  (loop for e in (cdr code) do
 		       (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
 		  (format s "}~%")))
-	 (function (destructuring-bind ((name params &optional ret ctor-initializer-list) &rest function-body) (cdr code)
+	 (function (destructuring-bind ((name params &optional ret &key ctor specifier) &rest function-body) (cdr code)
 		     (let ((header (concatenate 'string
 						(when ret (format nil "~a " ret))
 						(format nil "~a(~{~a~^,~})"
 							name
 							(emit-cpp :code `(:params ,params)))
-						(when ctor-initializer-list
+						(when specifier
+						  (format nil " ~a" specifier))
+						(when ctor
 						  (format nil ":~{~a~^,~}~%"
-							  (loop for (e f) in ctor-initializer-list collect
+							  (loop for (e f) in ctor collect
 							       (format nil " ~a( ~a )" e f)))))))
 		       (if function-body
 			   (concatenate 'string
@@ -194,30 +196,22 @@
 		 (+= b q))
 		)))
 
-
-(compile-cpp "/home/martin/stage/cl-cpp-generator/o.cpp"
-	     '(with-compilation-unit
-	       (include <vector>)
-	       (include <cstddef>)
-	       (function (main ((argc :type int)
-				(argv :type "const char**"))
-			  int)
-		(decl ((v :type "std::vector<int>")
-		       (max-vec-size :type "static const int" :init 256)))
-		
-		(for ((i 0 :type int) (< i max-vec-size) (+= i 1))
-		 (funcall v.push-back i))
-		(return 0))))
-
 (defun compile-cpp (fn code)
- (with-open-file (s fn
-		    :direction :output :if-exists :supersede :if-does-not-exist :create)
-   (emit-cpp :str s :code code))
- (sb-ext:run-program "/usr/bin/clang-format" `("-i" ,fn))
- (sleep .1)
- (sb-ext:run-program "/usr/bin/g++" `("-o" "o"  "-Os" ,fn))
- (sleep .1)
- (sb-ext:run-program "/usr/bin/objdump" `("-DS" "o")))
+  (let ((source-fn (concatenate 'string fn ".cpp"))
+	(bin-fn (concatenate 'string fn ".bin")))
+   (with-open-file (s source-fn
+		      :direction :output :if-exists :supersede :if-does-not-exist :create)
+     (emit-cpp :str s :code code))
+   (sb-ext:run-program "/usr/bin/clang-format" `("-i" ,source-fn))
+   (sleep .1)
+   (sb-ext:run-program "/usr/bin/g++" `("-o" ,bin-fn  "-Os" ,source-fn))
+;   (sleep .1)
+;   (sb-ext:run-program "/usr/bin/objdump" `("-DS" ,bin-fn))
+   ))
+
+
+
+
 
 #+nil
 (progn
