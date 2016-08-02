@@ -94,5 +94,7 @@
 	       (function (main ((argc :type int)
 				(argv :type "const char**"))
 			  int)
+		(decl ((glob :type "auto&" :init "SomeObj::instanceGlobal()")
+		       (local :type "auto&" :init "SomeObj::instanceLocal()")))
 		(for (() () ()))
 		(return 0))))
