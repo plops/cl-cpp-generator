@@ -30,12 +30,26 @@
 	       (include <cstddef>)
 	       (include <cstdlib>)
 	       (include <new>)
+	       ;; beware of third party C++ libraries that count on
+	       ;; exception been thrown and do not check return value
+	       ;; from perator new
 	       (function (new ((size :type size_t)) "void* operator" :specifier noexcept)
 		(return (funcall malloc size)))
 	       (function (delete ((p :type void*)) "void operator" :specifier noexcept)
 		(return (funcall free p)))
 	       (function (new[] ((size :type size_t)) "void* operator" :specifier noexcept)
 		(return (funcall malloc size)))
+	       (function (delete[] ((p :type void*)) "void operator" :specifier noexcept)
+		(return (funcall free p)))
+	       (function (new ((size :type size_t) (b :type "std::nothrow_t")) "void* operator" :specifier noexcept)
+	       	(return (funcall malloc size)))
+	       (function (delete ((p :type void*)  (b :type "std::nothrow_t")) "void operator" :specifier noexcept)
+	       	(return (funcall free p)))
+	       (function (new[] ((size :type size_t)  (b :type "std::nothrow_t")) "void* operator" :specifier noexcept)
+	       	(return (funcall malloc size)))
+	       (function (delete[] ((p :type void*)  (b :type "std::nothrow_t")) "void operator" :specifier noexcept)
+	       	(return (funcall free p)))
+
 	       (function (main ((argc :type int)
 				(argv :type "const char**"))
 			  int)
