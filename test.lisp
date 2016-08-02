@@ -173,19 +173,19 @@ int h2(int a);
 int i;
 Reset::BusCb resetBus;
 
-}
+};
 
 class sensor  : public p::pipeline, virtual public qqw::q, virtual public qq::q{
 sensor(char a);
 int j;
 
-}
+};
 
 union lag::sensor2  : private p::pipeline2{
 int j;
 float f;
 
-}
+};
 
 struct lag::sensor2  : private p::pipeline2{
 public:
@@ -193,7 +193,7 @@ public:
 int j;
 float f;
 
-}
+};
 
  };
 
