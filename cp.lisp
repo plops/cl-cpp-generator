@@ -51,9 +51,9 @@
 		       ;; start(memory-range [, page=0])
 		       ;; size(memory-range [, page=0])
 		       ;; end(memory-range [, page=0])
-		      (format nil "~a(~{~a~^,~})"
-			      (emit-cmd :code name)
-			      (mapcar #'(lambda (x) (emit-cmd :code x)) rest))))
+		       (format nil "~a(~{~a~^,~})"
+			       (emit-cmd :code name)
+			       (mapcar #'(lambda (x) (emit-cmd :code x)) rest))))
 	    (sections (destructuring-bind (&rest rest) (cdr code)
 			;; describe how inpt sections are combined
 			;; into output sections,
@@ -64,38 +64,58 @@
 			;; each other and in entire memory
 			
 			;; rename output sections
-		      (with-output-to-string (s)
-			(format s "SECTIONS~%")
-			(write-sequence (emit-cmd :code `(compound-statement ,@rest)) s))))
+			(with-output-to-string (s)
+			  (format s "SECTIONS~%")
+			  (write-sequence (emit-cmd :code `(compound-statement ,@rest)) s))))
 	    
-	    (section-block (destructuring-bind (name target &key page load run type load-start load-end run-start) (cdr code)
-			     (with-output-to-string (s)
-			       (format s "~a :" name)
-			       (when target
-				 (format s " ~a" target))
-			       (when page (format s " PAGE = ~a" page))
-			       (when load (format s " LOAD = ~a" load))
-			       (when run  (format s " RUN = ~a" run))
-			       (when type  (format s " TYPE = ~a" type))
-			       (when load-start  (format s " LOAD_START( ~a )" load-start))
-			       (when load-end  (format s " LOAD_END( ~a )" load-end))
-			       (when run-start  (format s " RUN_START( ~a )" run-start)))))
+	    (section-specification (destructuring-bind (name &rest properties) (cdr code)
+				     ;; each section specification
+				     ;; defines an output section in
+				     ;; the output file
+				     
+				     ;; name .. can refer to section,
+				     ;; subsection or archive library
+				     ;; members
+				     
+				     ;; properties .. list of
+				     ;; properties that define the
+				     ;; sections contents and their
+				     ;; allocation, separated by
+				     ;; optional commas
+
+				     ;; load = PROG, PAGE = 0 load = (0x0200)
+				     ;; the = is optional, it can also be a >, value can optionally be enclosed in ()
+				     ;; run = 0x010
+				     ;; usually load and run location are the same, except with slow external memory
+				     ;; if load and run separate, than all parameters after load refer to load and all after run to run
+				     ;; type = COPY
+				     ;; type = DSECT
+				     ;; type = NOLOAD
+				     ;; fill = 0xffffffff
+				     ;; { input_sections }
+				     ;; align = 16
+				     (with-output-to-string (s)
+				       (format s "~a :" name)
+				       (loop for (property-name value) in properties and i from 0 do
+					    (if (= i 0)
+						(format s " ~a = ~a" property-name value)
+						(format s ", ~a = ~a" property-name value))))))
 	    (section-blocks (destructuring-bind (&rest rest) (cdr code)
-			     (with-output-to-string (s)
-			       (loop for (name target &key page load run type load-start load-end run-start) in rest do
-				    (format s "~a~%" (emit-cmd :code (list 'section-block name target :page page :load load :run run :type type
-										     :load-start load-start :load-end load-end :run-start run-start)))))))
+			      (with-output-to-string (s)
+				(loop for (name target &key page load run type load-start load-end run-start) in rest do
+				     (format s "~a~%" (emit-cmd :code (list 'section-block name target :page page :load load :run run :type type
+									    :load-start load-start :load-end load-end :run-start run-start)))))))
 	    (memory (destructuring-bind (&rest rest) (cdr code)
 		      (with-output-to-string (s)
 			(format s "MEMORY~%")
 			(write-sequence (emit-cmd :code `(compound-statement ,@rest)) s))))
 	    
 	    (compound-statement (destructuring-bind (&rest lines) (cdr code)
-				    (with-output-to-string (s)
-				      (format s "{~%")
-				      (loop for e in lines do
-					   (format s "~a~%" (emit-cmd :code e)))
-				      (format s "}~%"))))
+				  (with-output-to-string (s)
+				    (format s "{~%")
+				    (loop for e in lines do
+					 (format s "~a~%" (emit-cmd :code e)))
+				    (format s "}~%"))))
 	    (memory-range (destructuring-bind (name attr origin length &optional fill) (cdr code)
 			    ;; page .. up to 32767 can be specified, overlap possible, defaults to 0
 			    ;; name .. max 64 chars A-Za-z$._
@@ -113,8 +133,8 @@
 				(format s ", fill = ~a" fill)))))
 	    (memory-ranges (destructuring-bind (&rest rest) (cdr code)
 			     (with-output-to-string (s)
-			      (loop for (name attr origin length &optional fill) in rest do
-				   (format s "~a~%" (emit-cmd :code `(memory-range ,name ,attr ,origin ,length ,fill)))))))
+			       (loop for (name attr origin length &optional fill) in rest do
+				    (format s "~a~%" (emit-cmd :code `(memory-range ,name ,attr ,origin ,length ,fill)))))))
 	    (page-specifier (destructuring-bind (number) (cdr code)
 			      (format nil "PAGE ~A:" number)))
 	    (t (cond
@@ -135,13 +155,13 @@
 		    (format s "~a)" (emit-cmd :code (car (last (cdr code)))))))
 		 ((member (car code)  '(<< >> == = < <= > >= & |\|| && ||||))
 		  ;; handle logical operators, i.e. ==, &&, ...
-		      (destructuring-bind (op left right) code
-			(format nil "(~a ~a ~a)"
-				(emit-cmd :code left)
-				op
-				(emit-cmd :code right))))
+		  (destructuring-bind (op left right) code
+		    (format nil "(~a ~a ~a)"
+			    (emit-cmd :code left)
+			    op
+			    (emit-cmd :code right))))
 		     
-		     (t (format nil "not processable: ~a" code)))))
+		 (t (format nil "not processable: ~a" code)))))
 	  (cond ((numberp code)
 		 (format nil "0x~x" code))
 		((or (symbolp code)
