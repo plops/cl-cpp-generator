@@ -86,7 +86,7 @@
 				     ;; load = PROG, PAGE = 0 load = (0x0200)
 				     ;; the = is optional, it can also be a >, value can optionally be enclosed in ()
 				     ;; run = 0x010
-				     ;; usually load and run location are the same, except with slow external memory
+				     ;; usually load and run location are the same, except with slow external memory (in our case flash)
 				     ;; if load and run separate, than all parameters after load refer to load and all after run to run
 				     ;; type = COPY
 				     ;; type = DSECT
@@ -94,6 +94,37 @@
 				     ;; fill = 0xffffffff
 				     ;; { input_sections }
 				     ;; align = 16
+				     ;; .text : load = align(32)  .. allocate .text so that it falls on a 32-byte boundary
+				     ;; palign .. pads the section to ensure size
+				     ;; .text : palign(2) {} > PMEM  ..  equivalent to this:
+				     ;; .text : palign = 2 {} > PMEM
+				     ;;   section starts on 2-byte boundary and its size is guaranteed to be multiple of 2 bytes
+				     ;; .mytext: palign(power2) {} > PMEM .. increases section size to the next power of two boundary
+				     ;;   .mytext being 120 bytes and PMEM starting at 0x10020 will result in:
+				     ;;   .mytext start=0x10080 size=0x80 align=128
+				     ;; block(0x100)  .. section must fit between two adresses aligned to the blocking factor
+				     ;; .. if too large it starts on an address boundary
+				     ;; ebss : load = block(0x0080) .. entire section is contained in a single 128-byte page
+				     ;;                                or begins on that boundary, block and align exclude each other
+				     ;; order: aligned from largest to smallest, blocked from largest to smallest,
+				     ;;        others from largest to smallest
+				     ;; page = 1 .. if page is not specified then initialized sections go to 0 and uninitialized to 1
+				     ;; .text: 0x0001000 .. binding 22-bit constant to location. sections must not overlap,
+				     ;;                     incompatible with named memory
+				     ;; .text: > (X)  .. bind to some executable memory,
+				     ;;                  linker uses lower addresses first and avoids fragmentation when possible
+				     ;; .stack : {} > RAM (HIGH)  .. location specifier, use this so that
+				     ;;                              small changes in application don't lead to large changes in memory map
+				     ;; .text: PAGE=0  .. anywhere in page0
+				     ;; .text : { "f1-new.obj"(.text) "f3-a.obj"(.text,sec2) }
+				     ;; .text : { *(.text) }   .. this is the default, if you dont write {..}
+				     ;; *(.data) matches .dataspecial
+				     ;; subsections are separated by colons: A:B:C or europe:north:norway
+				     ;; .rts > BOOT2 { --library=rtsXX.lib(.text) }
+				     ;; .text : {} > MEM1 | MEM2 | MEM3 .. list of ranges for the linker to choose from
+				     ;; .text : {} >> MEM1 | MEM2 | MEM3 .. .text output section can be split
+				     ;; .text : {} >> RAM .. split also works with a single target
+				     ;; .text : {} >> (RW) .. finds sections with matching attributes
 				     (with-output-to-string (s)
 				       (format s "~a :" name)
 				       (loop for (property-name value) in properties and i from 0 do
