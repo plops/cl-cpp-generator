@@ -122,7 +122,7 @@
 		 ((and (= 2 (length code)) (member (car code)  '(- ~ !)))
 		  ;; handle unary operators, i.e. - ~ !
 		  (destructuring-bind (op operand) code
-		    (format nil "(~a ~a)"
+		    (format nil "(~a (~a))"
 			    op
 			    (emit-cmd :code operand))))
 		 ((member (car code) '(* / % + -))
@@ -272,7 +272,7 @@
 		      ;; handle unary operators, i.e. - ~ !, this code
 		      ;; needs to be placed before binary - operator!
 		  (destructuring-bind (op operand) code
-		    (format nil "(~a ~a)"
+		    (format nil "(~a (~a))"
 			    op
 			    (emit-cmd :code operand))))
 		  ((member (car code) *binary-operator-symbol*)
