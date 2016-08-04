@@ -108,12 +108,16 @@
 		 (when false-statement
 		  (format s "else ~a"
 			  (emit-cpp :code `(compound-statement ,false-statement)))))))
-	 (setf (with-output-to-string (s)
-		 ;; handle multiple assignments
-		 (let ((args (cdr code)))
-		   (loop for i below (length args) by 2 do
-			(format s "~a~%"
-				(emit-cpp :code `(statement = ,(elt args i) ,(elt args (1+ i)))))))))
+	 (setf (destructuring-bind (&rest args) (cdr code)
+		(with-output-to-string (s)
+		  ;; handle multiple assignments
+		  (loop for i below (length args) by 2 do
+		       (format s "~a~%"
+			       (emit-cpp :code `(statement = ,(elt args i) ,(elt args (1+ i)))))))))
+	 (aref (destructuring-bind (name &optional n) (cdr code)
+		 (if n
+		     (format str "~a[~a]" name (emit-cpp :code n))
+		     (format str "~a[]" name))))
 	 (return (format str "return ~a"
 			 (emit-cpp :code (second code))))
 	 (funcall (destructuring-bind (name &rest rest) (cdr code)
@@ -239,7 +243,8 @@
 		(include <stdio.h>)
 		(include "bla.h")
 		(extern-c
-		 (decl ((sdata :type "extern Uint16"))))
+		 (decl (((aref sdata 12) :type "extern Uint16")
+			((aref sdata (+ 2 3)) :type "extern Uint16"))))
 		(with-namespace N
 		   (class "gug::senso" ()
 		   (access-specifier public)
@@ -288,7 +293,7 @@
 		   (+= a b)
 		   )
 		  ))))
-;  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
+  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
 
 
