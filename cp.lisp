@@ -112,8 +112,10 @@
 		(with-output-to-string (s)
 		  ;; handle multiple assignments
 		  (loop for i below (length args) by 2 do
-		       (format s "~a~%"
-			       (emit-cpp :code `(statement = ,(elt args i) ,(elt args (1+ i)))))))))
+		       (format s "~a"
+			       (emit-cpp :code `(statement = ,(elt args i) ,(elt args (1+ i))))))
+		  (if (< 2 (length args))
+		      (format s "~%")))))
 	 (aref (destructuring-bind (name &optional n) (cdr code)
 		 (if n
 		     (format str "~a[~a]" name (emit-cpp :code n))
