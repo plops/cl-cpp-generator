@@ -70,7 +70,7 @@
 			   (format str "namespace ~a {~%~{~a~%~} };~%"
 				   ns (loop for e in compound-statement collect 
 					   (emit-cpp :code e)))))
-	 (with-compilation-unit (format str "~{~a~%~}"
+	 (with-compilation-unit (format str "~{~a~^~%~}"
 				 (loop for e in (cdr code) collect 
 				      (emit-cpp :code e))))
 	 (decl (destructuring-bind (bindings) (cdr code)
@@ -121,7 +121,7 @@
 			      (emit-cpp :code name)
 			      (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 	 (extern-c (destructuring-bind (&rest rest) (cdr code)
-		     (format str "extern \"C\" {~%~{~a~%~}}~%"
+		     (format str "extern \"C\" {~%~{~a~^~%~}} // extern \"C\"~%"
 				 (loop for e in rest collect 
 				      (emit-cpp :code e)))))
 	 (raw (destructuring-bind (string) (cdr code)
