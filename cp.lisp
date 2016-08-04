@@ -148,6 +148,8 @@
 		(format str "0x~x" number)))
 	 (string (destructuring-bind (string) (cdr code)
 		   (format str "\"~a\"" string)))
+	 (string+len (destructuring-bind (string) (cdr code)
+		       (format str "\"~a\", ~a" string (length string))))
 	 (list (destructuring-bind (&rest rest) (cdr code)
 		 (format str "{~{~a~^,~}}" rest)))
 	 (lisp (eval (cadr code)))
