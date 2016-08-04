@@ -120,6 +120,10 @@
 		      (format str "~a(~{~a~^,~})"
 			      (emit-cpp :code name)
 			      (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
+	 (extern-c (destructuring-bind (&rest rest) (cdr code)
+		     (format str "extern \"C\" {~%~{~a~%~}}~%"
+				 (loop for e in rest collect 
+				      (emit-cpp :code e)))))
 	 (raw (destructuring-bind (string) (cdr code)
 		(format str "~a" string)))
 
@@ -226,7 +230,7 @@
 ;; integer divide, modulus, multiply, bitwise and, or, xor and compare are not implemented in hardware
 ;; --ram-model loader doesn't need .cinit sectionx
 
-#+nil
+
 (progn
   (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
@@ -234,6 +238,8 @@
 	      '(with-compilation-unit
 		(include <stdio.h>)
 		(include "bla.h")
+		(extern-c
+		 (decl ((sdata :type "extern Uint16"))))
 		(with-namespace N
 		   (class "gug::senso" ()
 		   (access-specifier public)
@@ -276,6 +282,7 @@
 			(+= b q)))
 		  (function (bla ((a :type char)
 				  (b :type int*)) ()
+				  :ctor
 				  ((a 3)
 				   (sendToSensorCb sendToSensorCb_)))
 		   (+= a b)
