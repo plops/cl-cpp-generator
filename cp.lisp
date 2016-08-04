@@ -85,11 +85,14 @@
 	 (decl (destructuring-bind (bindings) (cdr code)
 		 (with-output-to-string (s)
 		   (loop for e  in bindings do
-			(destructuring-bind (name &key (type 'auto) init) e
+			(destructuring-bind (name &key (type 'auto) init ctor) e
 			  (format s "~a ~a"
 				  type (emit-cpp :code name))
 			  (if init
-			      (format s " = ~a" (emit-cpp :code init)))
+			      (format s " = ~a" (emit-cpp :code init))
+			      (if ctor
+				  (format s "( ~a )" (emit-cpp :code ctor))
+				  ))
 			  (format s ";~%"))))))
 	 (let (destructuring-bind (bindings &rest rest) (cdr code)
 		(emit-cpp :code `(compound-statement
