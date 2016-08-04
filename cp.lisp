@@ -73,6 +73,15 @@
 	 (with-compilation-unit (format str "~{~a~^~%~}"
 				 (loop for e in (cdr code) collect 
 				      (emit-cpp :code e))))
+	 (enum (destructuring-bind (name &rest rest) (cdr code)
+		 (with-output-to-string (s)
+		   (format s "enum ~a {~{ ~a~^,~}};~%"
+			   name
+			   (loop for e in rest collect
+				(destructuring-bind (var &optional val) e
+				  (if val
+				      (format nil "~a = ~a" var (emit-cpp :code val))
+				      (format nil "~a" var))))))))
 	 (decl (destructuring-bind (bindings) (cdr code)
 		 (with-output-to-string (s)
 		   (loop for e  in bindings do
@@ -248,6 +257,7 @@
 	      '(with-compilation-unit
 		(include <stdio.h>)
 		(include "bla.h")
+		(enum fsm (powerOff 1) (normal) (error (+ normal 3))) 
 		(extern-c
 		 (decl (((aref sdata 12) :type "extern Uint16")
 			((aref rdata (+ 2 3)) :type "extern Uint16")
