@@ -130,6 +130,8 @@
 				      (emit-cpp :code e)))))
 	 (raw (destructuring-bind (string) (cdr code)
 		(format str "~a" string)))
+	 (hex (destructuring-bind (number) (cdr code)
+		(format str "0x~x" number)))
 	 (list (destructuring-bind (&rest rest) (cdr code)
 		 (format str "{~{~a~^,~}}" rest)))
 
@@ -137,7 +139,7 @@
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(= return funcall)))
+					       '(= return funcall raw)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
 		((member (second code) '(if for compound-statement decl setf))
