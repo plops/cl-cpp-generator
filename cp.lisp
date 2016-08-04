@@ -136,7 +136,7 @@
 		(format str "0x~x" number)))
 	 (list (destructuring-bind (&rest rest) (cdr code)
 		 (format str "{~{~a~^,~}}" rest)))
-
+	 (lisp (eval (cadr code)))
 	 (statement ;; add semicolon
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
@@ -144,7 +144,7 @@
 					       '(= return funcall raw)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for compound-statement decl setf))
+		((member (second code) '(if for compound-statement decl setf lisp))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
