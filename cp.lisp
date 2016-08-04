@@ -204,7 +204,9 @@
        (cond
 	 ((or (symbolp code)
 	      (stringp code)) ;; print variable
-	  (substitute #\_ #\- (format nil "~a" code)))
+	  (format nil "~a" code)
+	  ;(substitute #\_ #\- (format nil "~a" code))
+	  )
 	 ((numberp code) ;; print constants
 	      (cond ((integerp code) (format str "~a" code))
 		    ((floatp code)
