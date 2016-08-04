@@ -130,6 +130,8 @@
 				      (emit-cpp :code e)))))
 	 (raw (destructuring-bind (string) (cdr code)
 		(format str "~a" string)))
+	 (list (destructuring-bind (&rest rest) (cdr code)
+		 (format str "{~{~a~^,~}}" rest)))
 
 	 (statement ;; add semicolon
 	  (cond ((member (second code) (append *binary-operator-symbol*
@@ -244,7 +246,8 @@
 		(include "bla.h")
 		(extern-c
 		 (decl (((aref sdata 12) :type "extern Uint16")
-			((aref sdata (+ 2 3)) :type "extern Uint16"))))
+			((aref rdata (+ 2 3)) :type "extern Uint16")
+			((aref tdata) :type "extern Uint16" :init (list 3 1 4 1 5)))))
 		(with-namespace N
 		   (class "gug::senso" ()
 		   (access-specifier public)
