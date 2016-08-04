@@ -74,14 +74,14 @@
 				 (loop for e in (cdr code) collect 
 				      (emit-cpp :code e))))
 	 (enum (destructuring-bind (name &rest rest) (cdr code)
+		 ;; enum bla (normal 1) power-on (error (+ 1 2))
 		 (with-output-to-string (s)
 		   (format s "enum ~a {~{ ~a~^,~}};~%"
-			   name
+			   (if name name "")
 			   (loop for e in rest collect
-				(destructuring-bind (var &optional val) e
-				  (if val
-				      (format nil "~a = ~a" var (emit-cpp :code val))
-				      (format nil "~a" var))))))))
+				(if (listp e)
+				    (format nil "~a = ~a" (first e) (emit-cpp :code (second e)))
+				    (format nil "~a" e)))))))
 	 (decl (destructuring-bind (bindings) (cdr code)
 		 (with-output-to-string (s)
 		   (loop for e  in bindings do
