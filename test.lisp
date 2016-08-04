@@ -6,7 +6,7 @@
 (compile-file "cp.lisp")
 (load "cp.fasl")
 
-(in-package :g)
+(in-package :cl-cpp-generator)
 
 (defun clang-format (str)
   (with-open-file (s "/dev/shm/o.cpp"

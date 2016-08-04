@@ -1,6 +1,6 @@
-(defpackage :g
+(defpackage :cl-cpp-generator
   (:use :cl))
-(in-package :g)
+(in-package :cl-cpp-generator)
 
 (setf (readtable-case *readtable*) :invert)
 
@@ -222,8 +222,9 @@
    ))
 
 
-
-
+;; interrupt routine doesn't have to save registers if no other functions are called
+;; integer divide, modulus, multiply, bitwise and, or, xor and compare are not implemented in hardware
+;; --ram-model loader doesn't need .cinit sectionx
 
 #+nil
 (progn
