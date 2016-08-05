@@ -175,9 +175,9 @@
 	 (array+lenbytes (destructuring-bind (name) (cdr code)
 		       (format str "~a, sizeof( ~a )" name name)))
 	 (list (destructuring-bind (&rest rest) (cdr code)
-		 (format str "{~{~a~^,~}}" rest)))
+		 (format str "{~{~a~^,~}}" (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 	 (comma-list (destructuring-bind (&rest rest) (cdr code)
-		  (format str "~{~a~^,~}" rest)))
+		  (format str "~{~a~^,~}" (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 	 (lisp (eval (cadr code)))
 	 (statement ;; add semicolon
 	  (cond ((member (second code) (append *binary-operator-symbol*
