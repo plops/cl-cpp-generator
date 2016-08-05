@@ -122,6 +122,9 @@
 			    (emit-cpp :code update-expression-opt)
 			    "")
 			(emit-cpp :code `(compound-statement ,@statement-list)))))
+	 (dotimes (destructuring-bind ((var n) &rest body) (cdr code)
+		    (emit-cpp :code `(for ((,var 0 :type int) (< ,var ,n) (+= ,var 1))
+					  ,@body))))
 	 (if (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
 	       (with-output-to-string (s)
 		 (format s "if ( ~a ) ~a"
@@ -187,7 +190,7 @@
 					       '(= return funcall raw go break)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for compound-statement tagbody decl setf lisp case let))
+		((member (second code) '(if for dotimes compound-statement tagbody decl setf lisp case let))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
