@@ -123,12 +123,24 @@
 			(emit-cpp :code `(compound-statement ,@statement-list)))))
 	 (if (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
 	       (with-output-to-string (s)
-		 (format s "if (~a) ~a"
+		 (format s "if ( ~a ) ~a"
 			 (emit-cpp :code condition)
 			 (emit-cpp :code `(compound-statement ,true-statement)))
 		 (when false-statement
 		  (format s "else ~a"
 			  (emit-cpp :code `(compound-statement ,false-statement)))))))
+	 (break (format str "break"))
+	 (case (destructuring-bind (expr &rest cases) (cdr code)
+		 (with-output-to-string (s)
+		   (format s "switch ( ~a ) {~%" (emit-cpp :code expr))
+		   (loop for e in cases do
+			(destructuring-bind (const-expr &rest statements) e
+			  (format s "case ~a : ~a" (if (eq const-expr t)
+						       "default"
+						       const-expr)
+				  (emit-cpp :code `(compound-statement ,@statements (break)))))
+			(format s ""))
+		   (format s "}~%"))))
 	 (setf (destructuring-bind (&rest args) (cdr code)
 		(with-output-to-string (s)
 		  ;; handle multiple assignments
@@ -166,10 +178,10 @@
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(= return funcall raw go)))
+					       '(= return funcall raw go break)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for compound-statement tagbody decl setf lisp))
+		((member (second code) '(if for compound-statement tagbody decl setf lisp case))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
@@ -328,7 +340,14 @@
 		   (tagbody
 		    start
 		      (if (== a b)
-			  (go start)))
+			  (go start)
+			  (go next))
+		    next
+		      (case q
+			(3 (+= q 3))
+			(4 (+= q 4)
+			   (/= p 2))
+			(t (/= p 1))))
 		   )
 		  ))))
   (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
