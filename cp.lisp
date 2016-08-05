@@ -173,7 +173,7 @@
 	 (string+len (destructuring-bind (string) (cdr code)
 		       (format str "\"~a\", ~a" string (length string))))
 	 (array+lenbytes (destructuring-bind (name) (cdr code)
-		       (format str "\"~a\", sizeof( ~a )" name name)))
+		       (format str "~a, sizeof( ~a )" name name)))
 	 (list (destructuring-bind (&rest rest) (cdr code)
 		 (format str "{~{~a~^,~}}" rest)))
 	 (lisp (eval (cadr code)))
