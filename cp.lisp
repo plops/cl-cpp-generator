@@ -76,9 +76,10 @@
 			   ;; public, private or protected
 			   )
 	 (with-namespace (destructuring-bind (ns &rest compound-statement) (cdr code)
-			   (format str "namespace ~a {~%~{~a~%~} };~%"
+			   (format str "namespace ~a {~%~{~a~%~} }; // namespace ~a ~%"
 				   ns (loop for e in compound-statement collect 
-					   (emit-cpp :code e)))))
+					   (emit-cpp :code e))
+				   ns)))
 	 (with-compilation-unit (format str "~{~a~^~%~}"
 				 (loop for e in (cdr code) collect 
 				      (emit-cpp :code e))))
