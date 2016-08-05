@@ -46,6 +46,15 @@
 		  (loop for e in (cdr code) do
 		       (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
 		  (format s "}~%")))
+	 (tagbody (with-output-to-string (s)
+		  (format s "{~%")
+		  (loop for e in (cdr code) do
+		       (if (symbolp e)
+			   (format s " ~a:~%" e)
+			   (format s "  ~a~%"  (emit-cpp :code (append '(statement) e)))))
+		  (format s "}~%")))
+	 (go (destructuring-bind (name) (cdr code)
+	       (format str "goto ~a" name)))
 	 (function (destructuring-bind ((name params &optional ret &key ctor specifier) &rest function-body) (cdr code)
 		     (let ((header (concatenate 'string
 						(when ret (format nil "~a " ret))
@@ -157,10 +166,10 @@
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(= return funcall raw)))
+					       '(= return funcall raw go)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for compound-statement decl setf lisp))
+		((member (second code) '(if for compound-statement tagbody decl setf lisp))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
@@ -316,7 +325,10 @@
 				  :ctor
 				  ((a 3)
 				   (sendToSensorCb sendToSensorCb_)))
-		   (+= a b)
+		   (tagbody
+		    start
+		      (if (== a b)
+			  (go start)))
 		   )
 		  ))))
   (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
