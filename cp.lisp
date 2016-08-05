@@ -181,7 +181,7 @@
 					       '(= return funcall raw go break)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for compound-statement tagbody decl setf lisp case))
+		((member (second code) '(if for compound-statement tagbody decl setf lisp case let))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
