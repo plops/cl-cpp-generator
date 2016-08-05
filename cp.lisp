@@ -177,7 +177,7 @@
 	 (string+len (destructuring-bind (string) (cdr code)
 		       (format str "\"~a\", ~a" string (length string))))
 	 (array+lenbytes (destructuring-bind (name) (cdr code)
-		       (format str "~a, sizeof( ~a )" name name)))
+		       (format str "~a, ( 2 * sizeof( ~a ) )" name name)))
 	 (list (destructuring-bind (&rest rest) (cdr code)
 		 (format str "{~{~a~^,~}}" (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 	 (comma-list (destructuring-bind (&rest rest) (cdr code)
@@ -190,7 +190,7 @@
 					       '(= return funcall raw go break)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for dotimes compound-statement tagbody decl setf lisp case let))
+		((member (second code) '(if for dotimes compound-statement with-compilation-unit tagbody decl setf lisp case let))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
