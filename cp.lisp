@@ -137,7 +137,7 @@
 			(destructuring-bind (const-expr &rest statements) e
 			  (format s "case ~a : ~a" (if (eq const-expr t)
 						       "default"
-						       const-expr)
+						       (emit-cpp :code const-expr))
 				  (emit-cpp :code `(compound-statement ,@statements (break)))))
 			(format s ""))
 		   (format s "}~%"))))
