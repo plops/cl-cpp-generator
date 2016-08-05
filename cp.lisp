@@ -135,10 +135,11 @@
 		   (format s "switch ( ~a ) {~%" (emit-cpp :code expr))
 		   (loop for e in cases do
 			(destructuring-bind (const-expr &rest statements) e
-			  (format s "case ~a : ~a" (if (eq const-expr t)
-						       "default"
-						       (emit-cpp :code const-expr))
-				  (emit-cpp :code `(compound-statement ,@statements (break)))))
+			  (if (eq const-expr t)
+			      (format s "default : ~a" (emit-cpp :code `(compound-statement ,@statements (break))))
+			      (format s "case ~a : ~a"
+				      (emit-cpp :code const-expr)
+				      (emit-cpp :code `(compound-statement ,@statements (break))))))
 			(format s ""))
 		   (format s "}~%"))))
 	 (setf (destructuring-bind (&rest args) (cdr code)
