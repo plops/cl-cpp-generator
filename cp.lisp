@@ -288,7 +288,7 @@
 ;; integer divide, modulus, multiply, bitwise and, or, xor and compare are not implemented in hardware
 ;; --ram-model loader doesn't need .cinit sectionx
 
-
+#+nil
 (progn
   (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
