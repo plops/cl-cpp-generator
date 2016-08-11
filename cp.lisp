@@ -76,7 +76,7 @@
 			   ;; public, private or protected
 			   )
 	 (with-namespace (destructuring-bind (ns &rest compound-statement) (cdr code)
-			   (format str "namespace ~a {~%~{~a~%~} }; // namespace ~a ~%"
+			   (format str "namespace ~a {~%~{~a~%~} } // namespace ~a ~%"
 				   ns (loop for e in compound-statement collect 
 					   (emit-cpp :code e))
 				   ns)))
@@ -177,7 +177,7 @@
 	 (string+len (destructuring-bind (string) (cdr code)
 		       (format str "\"~a\", ~a" string (length string))))
 	 (array+lenbytes (destructuring-bind (name) (cdr code)
-		       (format str "~a, ( 2 * sizeof( ~a ) )" name name)))
+			   (format str "~a, ( 2 * sizeof( ~a ) )" name name)))
 	 (list (destructuring-bind (&rest rest) (cdr code)
 		 (format str "{~{~a~^,~}}" (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 	 (comma-list (destructuring-bind (&rest rest) (cdr code)
