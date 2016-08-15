@@ -201,7 +201,7 @@
 		  (destructuring-bind (op operand) code
 		    (format nil "(~a (~a))"
 			    op
-			    (emit-cmd :code operand))))
+			    (emit-cpp :code operand))))
 		  ((member (car code) *binary-operator-symbol*)
 		   ;; handle binary operators
 		   ;; no semicolon
