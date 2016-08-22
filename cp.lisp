@@ -170,6 +170,8 @@
 				      (emit-cpp :code e)))))
 	 (raw (destructuring-bind (string) (cdr code)
 		(format str "~a" string)))
+	 (cast (destructuring-bind (type expr) (cdr code)
+		 (format str "(( ~a ) ( ~a ))" type (emit-cpp :code expr))))
 	 (hex (destructuring-bind (number) (cdr code)
 		(format str "0x~x" number)))
 	 (string (destructuring-bind (string) (cdr code)
