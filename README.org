@@ -119,3 +119,16 @@ TAGS, and NIL is returned. If a statement contains a GO to a defined TAG
 within the lexical scope of the form, then control is transferred to the next
 statement following that tag. A TAG must be an integer or a symbol. A
 STATEMENT must be a list. Other objects are illegal within the body.
+
+
+# References
+
+- how to write a dsl in lisp: https://www.youtube.com/watch?v=5FlHq_iiDW0
+
+- http://voodoo-slide.blogspot.de/2010/01/amplifying-c.html
+
+- https://github.com/burtonsamograd/sxc
+
+- https://github.com/shirok/Gauche/blob/master/lib/gauche/cgen/cise.scm
+
+- https://news.ycombinator.com/item?id=13199610
