@@ -42,14 +42,14 @@
 			 (format str "~a ~a" type name))))
 	 (include (format str "#include ~s" (cadr code)))
 	 (compound-statement (with-output-to-string (s)
-		  (format s "{~%")
-		  (loop for e in (cdr code) do
-		       (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
-		  (format s "}~%")))
-	 (statement-list (with-output-to-string (s)
-			   (loop for e in (cdr code) do
-				(format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
-			   ))
+			       (format s "{~%")
+			       (loop for e in (cdr code) do
+				    (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
+			       (format s "}~%")))
+	 (statements (with-output-to-string (s)
+		       (loop for e in (cdr code) do
+			    (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
+		       ))
 	 (tagbody (with-output-to-string (s)
 		  (format s "{~%")
 		  (loop for e in (cdr code) do
@@ -196,7 +196,7 @@
 					       '(= return funcall raw go break)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for dotimes compound-statement with-compilation-unit tagbody decl setf lisp case let))
+		((member (second code) '(if for dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
@@ -293,6 +293,16 @@
 ;; interrupt routine doesn't have to save registers if no other functions are called
 ;; integer divide, modulus, multiply, bitwise and, or, xor and compare are not implemented in hardware
 ;; --ram-model loader doesn't need .cinit sectionx
+
+#+nil
+(emit-cpp :code '(with-compilation-unit (dotimes (i 12)
+					  (if (== i 3)
+					      (compound-statement
+					       (funcall b i)
+					       (funcall c i))
+					      (statements
+					       (funcall b i)
+					       (funcall c i))))))
 
 #+nil
 (progn
