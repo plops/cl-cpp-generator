@@ -46,6 +46,10 @@
 		  (loop for e in (cdr code) do
 		       (format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
 		  (format s "}~%")))
+	 (statement-list (with-output-to-string (s)
+			   (loop for e in (cdr code) do
+				(format s "  ~a~%"  (emit-cpp :code (append '(statement) e))))
+			   ))
 	 (tagbody (with-output-to-string (s)
 		  (format s "{~%")
 		  (loop for e in (cdr code) do
