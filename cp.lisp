@@ -176,6 +176,14 @@
 		(format str "~a" string)))
 	 (cast (destructuring-bind (type expr) (cdr code)
 		 (format str "(( ~a ) ( ~a ))" type (emit-cpp :code expr))))
+	 (ns  (destructuring-bind (ns member) (cdr code)
+	       (format str "~a::~a" (emit-cpp :code ns) (emit-cpp :code member))))
+	 (dot  (destructuring-bind (object member) (cdr code)
+	       (format str "(~a).(~a)" (emit-cpp :code object) (emit-cpp :code member))))
+	 (arrow  (destructuring-bind (object member) (cdr code)
+		   (format str "(~a)->(~a)" (emit-cpp :code object) (emit-cpp :code member))))
+	 (ref  (destructuring-bind (object) (cdr code)
+		   (format str "(&(~a))" (emit-cpp :code object))))
 	 (hex (destructuring-bind (number) (cdr code)
 		(format str "0x~x" number)))
 	 (string (destructuring-bind (string) (cdr code)
@@ -297,12 +305,12 @@
 #+nil
 (emit-cpp :code '(with-compilation-unit (dotimes (i 12)
 					  (if (== i 3)
-					      (compound-statement
-					       (funcall b i)
-					       (funcall c i))
 					      (statements
-					       (funcall b i)
-					       (funcall c i))))))
+					       (funcall (ns std (ns b b)) i)
+					       (funcall (arrow  c c) i))
+					      (statements
+					       (funcall (ref b) i)
+					       (funcall (dot c a) i))))))
 
 #+nil
 (progn
