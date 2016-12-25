@@ -183,10 +183,20 @@
 		  (loop for e in nss do
 		       (format s "~a::" (emit-cpp :code e)))
 		  (format s "~a"  (emit-cpp :code member)))))
-	 (dot  (destructuring-bind (object member) (cdr code)
-	       (format str "(~a).(~a)" (emit-cpp :code object) (emit-cpp :code member))))
-	 (arrow  (destructuring-bind (object member) (cdr code)
-		   (format str "(~a)->(~a)" (emit-cpp :code object) (emit-cpp :code member))))
+	 (dot  (let* ((args (cdr code))
+		     (nss (butlast args))
+		     (member (car (last args))))
+		(with-output-to-string (s)
+		  (loop for e in nss do
+		       (format s "~a." (emit-cpp :code e)))
+		  (format s "~a"  (emit-cpp :code member)))))
+	 (arrow  (let* ((args (cdr code))
+		     (nss (butlast args))
+		     (member (car (last args))))
+		(with-output-to-string (s)
+		  (loop for e in nss do
+		       (format s "~a->" (emit-cpp :code e)))
+		  (format s "~a"  (emit-cpp :code member)))))
 	 (ref  (destructuring-bind (object) (cdr code)
 		 (format str "(&(~a))" (emit-cpp :code object))))
 	 (deref  (destructuring-bind (object) (cdr code)
@@ -317,7 +327,7 @@
 					       (funcall (arrow  (ns a b c) c) i))
 					      (statements
 					       (funcall (ref b) i)
-					       (funcall (dot c (deref a)) i))))))
+					       (funcall (dot (aref c 3) (deref a) c) i))))))
 
 #+nil
 (progn
