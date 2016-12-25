@@ -183,7 +183,9 @@
 	 (arrow  (destructuring-bind (object member) (cdr code)
 		   (format str "(~a)->(~a)" (emit-cpp :code object) (emit-cpp :code member))))
 	 (ref  (destructuring-bind (object) (cdr code)
-		   (format str "(&(~a))" (emit-cpp :code object))))
+		 (format str "(&(~a))" (emit-cpp :code object))))
+	 (deref  (destructuring-bind (object) (cdr code)
+		   (format str "(*(~a))" (emit-cpp :code object))))
 	 (hex (destructuring-bind (number) (cdr code)
 		(format str "0x~x" number)))
 	 (string (destructuring-bind (string) (cdr code)
@@ -310,7 +312,7 @@
 					       (funcall (arrow  c c) i))
 					      (statements
 					       (funcall (ref b) i)
-					       (funcall (dot c a) i))))))
+					       (funcall (dot c (deref a)) i))))))
 
 #+nil
 (progn
