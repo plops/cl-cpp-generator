@@ -176,8 +176,13 @@
 		(format str "~a" string)))
 	 (cast (destructuring-bind (type expr) (cdr code)
 		 (format str "(( ~a ) ( ~a ))" type (emit-cpp :code expr))))
-	 (ns  (destructuring-bind (ns member) (cdr code)
-	       (format str "~a::~a" (emit-cpp :code ns) (emit-cpp :code member))))
+	 (ns  (let* ((args (cdr code))
+		     (nss (butlast args))
+		     (member (car (last args))))
+		(with-output-to-string (s)
+		  (loop for e in nss do
+		       (format s "~a::" (emit-cpp :code e)))
+		  (format s "~a"  (emit-cpp :code member)))))
 	 (dot  (destructuring-bind (object member) (cdr code)
 	       (format str "(~a).(~a)" (emit-cpp :code object) (emit-cpp :code member))))
 	 (arrow  (destructuring-bind (object member) (cdr code)
@@ -309,7 +314,7 @@
 					  (if (== i 3)
 					      (statements
 					       (funcall (ns std (ns b b)) i)
-					       (funcall (arrow  c c) i))
+					       (funcall (arrow  (ns a b c) c) i))
 					      (statements
 					       (funcall (ref b) i)
 					       (funcall (dot c (deref a)) i))))))
