@@ -1,7 +1,10 @@
 ;; http://www.sbcl.org/manual/ 16.3 sb-cover
 (require :sb-cover)
 
-(declaim (optimize sb-cover:store-coverage-data))
+(declaim (optimize sb-cover:store-coverage-data)
+	 (speed 0)
+	 (safety 3)
+	 (debug 3))
 
 (compile-file "cp.lisp")
 (load "cp.fasl")
@@ -22,9 +25,11 @@
 
  
 (defun test (num code string)
-  (assert (and num (string=
-	    (clang-format (emit-cpp :str nil :code code))
-	    (clang-format string)))))
+  (assert (string=
+	   (clang-format (emit-cpp :str nil :code code))
+	   (clang-format string)
+	   ))
+  num)
 (progn	;; for loop
   (test 0
    '(for ((i a :type int) (< i n) (+= i 1))
@@ -65,7 +70,7 @@ b += q;
 (progn ;; if
   (test 5
    '(if (== a b) (+= a b) (-= a b))
-   "if (a == b) {
+   "if ((a == b)) {
   a += b;
 }
 else {
@@ -74,7 +79,7 @@ else {
 ")
   (test 6 
    '(if (== a b) (+= a b))
-   "if (a == b) {
+   "if ((a == b)) {
   a += b;
 }
 "))
@@ -85,8 +90,7 @@ else {
 l = (1 + 2 + 3);
 ")
   (test 8 '(setf q (+ 1 2 3))
-	"q = (1 + 2 + 3);
-")
+	"q = (1 + 2 + 3);")
   )
 
 (progn ;; decl
