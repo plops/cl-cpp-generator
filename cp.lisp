@@ -32,6 +32,14 @@
 #+nil
 (trace emit-cpp)
 
+(defun print-sufficient-digits-f32 (f)
+  "print a floating point number as a string with a given nr. of
+  digits. parse it again and increase nr. of digits until the same bit
+  pattern."
+  )
+
+(let ((a 3.2431113s-23))
+ (format nil "~g" a))
 
 (defun emit-cpp (&key code (str nil))
   (if code
@@ -184,19 +192,19 @@
 		       (format s "~a::" (emit-cpp :code e)))
 		  (format s "~a"  (emit-cpp :code member)))))
 	 (dot  (let* ((args (cdr code))
-		     (nss (butlast args))
-		     (member (car (last args))))
-		(with-output-to-string (s)
-		  (loop for e in nss do
-		       (format s "~a." (emit-cpp :code e)))
-		  (format s "~a"  (emit-cpp :code member)))))
+		      (nss (butlast args))
+		      (member (car (last args))))
+		 (with-output-to-string (s)
+		   (loop for e in nss do
+			(format s "~a." (emit-cpp :code e)))
+		   (format s "~a"  (emit-cpp :code member)))))
 	 (arrow  (let* ((args (cdr code))
 		     (nss (butlast args))
 		     (member (car (last args))))
-		(with-output-to-string (s)
-		  (loop for e in nss do
-		       (format s "~a->" (emit-cpp :code e)))
-		  (format s "~a"  (emit-cpp :code member)))))
+		   (with-output-to-string (s)
+		     (loop for e in nss do
+			  (format s "~a->" (emit-cpp :code e)))
+		     (format s "~a"  (emit-cpp :code member)))))
 	 (ref  (destructuring-bind (object) (cdr code)
 		 (format str "(&(~a))" (emit-cpp :code object))))
 	 (deref  (destructuring-bind (object) (cdr code)

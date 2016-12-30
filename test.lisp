@@ -20,50 +20,50 @@
       str)))
 
 
-
-(defun test (code string)
-  (assert (string=
-	   (clang-format (emit-cpp :str nil :code code))
-	   (clang-format string))))
+ 
+(defun test (num code string)
+  (assert (and num (string=
+	    (clang-format (emit-cpp :str nil :code code))
+	    (clang-format string)))))
 (progn	;; for loop
-  (test 
+  (test 0
    '(for ((i a :type int) (< i n) (+= i 1))
      (+= b q))
-   "for (int i = a; i < n; i += 1) {
+   "for (int i = a; (i < n); i += 1) {
 b += q;
 }
 ")
-  (test 
+  (test 1
    '(for (() (< i n) (+= i 1))
      (+= b q))
-   "for (; i < n; i += 1) {
+   "for (; (i < n); i += 1) {
 b += q;
 }
 ")
-  (test 
+  (test 2
    '(for ((i a :type int) () (+= i 1))
      (+= b q))
    "for (int i = a; ; i += 1) {
 b += q;
 }
 ")
-  (test 
+  (test 3
    '(for ((i a :type int) (< i n) ())
      (+= b q))
-   "for (int i = a; i < n;) {
+   "for (int i = a; (i < n);) {
 b += q;
 }
 ")
-  (test 
+  (test 4
    '(for ((i a) (< i n) ())
      (+= b q))
-   "for (auto i = a; i < n;) {
+   "for (auto i = a; (i < n);) {
 b += q;
 }
 "))
 
 (progn ;; if
-  (test
+  (test 5
    '(if (== a b) (+= a b) (-= a b))
    "if (a == b) {
   a += b;
@@ -72,7 +72,7 @@ else {
   a -= b;
 }
 ")
-  (test
+  (test 6 
    '(if (== a b) (+= a b))
    "if (a == b) {
   a += b;
@@ -80,17 +80,17 @@ else {
 "))
 
 (progn ;; setf
-  (test '(setf q (+ 1 2 3) l (+ 1 2 3))
+  (test 7 '(setf q (+ 1 2 3) l (+ 1 2 3))
 	"q = (1 + 2 + 3);
 l = (1 + 2 + 3);
 ")
-  (test '(setf q (+ 1 2 3))
+  (test 8 '(setf q (+ 1 2 3))
 	"q = (1 + 2 + 3);
 ")
   )
 
 (progn ;; decl
-  (test '(decl ((i :type int :init 0)
+  (test 9 '(decl ((i :type int :init 0)
 		(f :type float :init 3.2s-7)
 		(d :type double :init 7.2d-31)
 		(z :type "complex float" :init #.(complex 2s0 1s0))
@@ -103,7 +103,7 @@ complex double w = ((2.000000000000000000e+0) + (1.000000000000000000e+0i));
 "))
 
 (progn ;; let
-  (test '(let ((i :type int :init 0)
+  (test 10 '(let ((i :type int :init 0)
 			(f :type float :init 3.2s-7)
 			(d :type double :init 7.2d-31)
 			(z :type "complex float" :init #.(complex 2s0 1s0))
@@ -126,10 +126,10 @@ j = (3 - j);
   )
 
 (progn ;; computed assignment with complicated variable
-  (test '(+= "a::b" 3) "a::b += 3"))
+  (test 11 '(+= "a::b" 3) "a::b += 3"))
 
 (progn ;; class, struct and union; function declaration
- (test '(with-compilation-unit
+ (test 12 '(with-compilation-unit
 	 (include <stdio.h>)
 	 (include "bla.h")
 	 (with-namespace N
@@ -205,7 +205,7 @@ float f;
 
 
 (progn ;; function definition
-  (test '(function (g ((a :type char)
+  (test 13 '(function (g ((a :type char)
 		       (b :type int*)) "complex double::blub")
 	 (decl ((q :init b)))
 	 (setf  "blub::q" (+ 1 2 3)
@@ -219,7 +219,7 @@ l = (1 + 2 + 3);
 }
 ")
   ;; constructor with initializers
-  (test '(function (bla ((a :type char)
+  (test 14 '(function (bla ((a :type char)
 				  (b :type int*)) ()
 				  :ctor ((a 3)
 				   (sendToSensorCb sendToSensorCb_)))
@@ -232,7 +232,7 @@ l = (1 + 2 + 3);
 "))
 
 (progn ;; function call
-  (test '(function (g ((a :type char)
+  (test 15 '(function (g ((a :type char)
 		       (b :type int*)) "complex double::blub")
 	 (funcall add a b))
 	"complex double ::blub g(char a, int *b) { add(a, b); }
