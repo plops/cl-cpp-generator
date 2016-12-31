@@ -33,13 +33,25 @@
 (trace emit-cpp)
 
 (defun print-sufficient-digits-f32 (f)
-  "print a floating point number as a string with a given nr. of
+  "print a single floating point number as a string with a given nr. of
   digits. parse it again and increase nr. of digits until the same bit
   pattern."
-  )
+  (let* ((ff (coerce f 'single-float))
+	 (s (format nil "~E" ff)))
+   (assert (= 0s0 (- ff
+		     (read-from-string s))))
+   (substitute #\f #\e s)))
 
-(let ((a 3.2431113s-23))
- (format nil "~g" a))
+(defun print-sufficient-digits-f64 (f)
+  "print a double floating point number as a string with a given nr. of
+  digits. parse it again and increase nr. of digits until the same bit
+  pattern."
+  (let* ((ff (coerce f 'double-float))
+	 (s (format nil "~E" ff)))
+   (assert (= 0s0 (- ff
+		     (read-from-string s))))
+   (substitute #\e #\d s)))
+
 
 (defun emit-cpp (&key code (str nil))
   (if code
@@ -284,18 +296,20 @@
 	      (cond ((integerp code) (format str "~a" code))
 		    ((floatp code)
 		     (typecase code
-		       (single-float (substitute #\f #\e (format str "(~,10e)" code)))
-		       (double-float (substitute #\e #\d (format str "(~,18e)" code)))))
+		       (single-float (format str "(~a)" (print-sufficient-digits-f32 code)))
+		       (double-float (format str "(~a)" (print-sufficient-digits-f64 code)))))
 		    ((complexp code)
 		     (typecase (realpart code)
 		       (single-float
 			(substitute #\f #\e
-				       (format str "((~,10e) + (~,10ei))"
-					       (realpart code) (imagpart code))))
+				       (format str "((~a) + (~ai))"
+					       (print-sufficient-digits-f32 (realpart code))
+					       (print-sufficient-digits-f32 (imagpart code)))))
 		       (double-float
 			(substitute #\e #\d
-				       (format nil "((~,18e) + (~,18ei))"
-					       (realpart code) (imagpart code))))))))))
+				    (format nil "((~a) + (~ai))"
+					    (print-sufficient-digits-f64 (realpart code))
+					    (print-sufficient-digits-f64 (imagpart code)))))))))))
       ""))
 
 #+nil
