@@ -11,13 +11,15 @@
 
 (in-package :cl-cpp-generator)
 
-(defun clang-format (str)
-  (with-open-file (s "/dev/shm/o.cpp"
+(defun clang-format (str &optional
+			   (fn "/dev/shm/o.cpp")
+			   )
+  (with-open-file (s fn
 		     :direction :output :if-exists :supersede :if-does-not-exist :create)
     (write-sequence str s))
   (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/dev/shm/o.cpp"))
   (sleep .1)
-  (with-open-file (s "/dev/shm/o.cpp")
+  (with-open-file (s fn)
     (let ((str (make-string (file-length s))))
       (read-sequence str s)
       str)))
@@ -25,11 +27,20 @@
 
  
 (defun test (num code string)
-  (assert (string=
+  (if (string=
 	   (clang-format (emit-cpp :str nil :code code))
 	   (clang-format string)
-	   ))
-  num)
+	   )
+      num
+      (progn
+	(clang-format (emit-cpp :str nil :code code) "/dev/shm/1")
+	(clang-format string "/dev/shm/2")
+	(assert (eq nil
+		   (with-output-to-string (s)
+		     (sb-ext:run-program "/usr/bin/diff" '("/dev/shm/1" "/dev/shm/2")
+					 :output s)))))))
+
+
 (progn	;; for loop
   (test 0
    '(for ((i a :type int) (< i n) (+= i 1))
@@ -203,7 +214,7 @@ float f;
 
 };
 
- };
+ } // namespace N
 
 "))
 
