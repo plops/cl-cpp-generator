@@ -1,10 +1,10 @@
 ;; http://www.sbcl.org/manual/ 16.3 sb-cover
 (require :sb-cover)
 
-(declaim (optimize sb-cover:store-coverage-data)
-	 (speed 0)
-	 (safety 3)
-	 (debug 3))
+(declaim (optimize sb-cover:store-coverage-data
+		   (speed 0)
+		   (safety 3)
+		   (debug 3)))
 
 (compile-file "cp.lisp")
 (load "cp.fasl")
