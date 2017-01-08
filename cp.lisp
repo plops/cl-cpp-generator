@@ -203,18 +203,18 @@
 		  (loop for e in nss do
 		       (format s "~a::" (emit-cpp :code e)))
 		  (format s "~a"  (emit-cpp :code member)))))
-	 (dot  (let* ((args (cdr code))
-		      (nss (butlast args))
-		      (member (car (last args))))
-		 (with-output-to-string (s)
-		   (loop for e in nss do
-			(format s "~a." (emit-cpp :code e)))
-		   (format s "~a"  (emit-cpp :code member)))))
-	 (arrow  (let* ((args (cdr code))
-		     (nss (butlast args))
-		     (member (car (last args))))
+	 (slot-value  (let* ((args (cdr code))
+			     (objs (butlast args))
+			     (member (car (last args))))
+			(with-output-to-string (s)
+			  (loop for e in objs do
+			       (format s "~a." (emit-cpp :code e)))
+			  (format s "~a"  (emit-cpp :code member)))))
+	 (slot->value  (let* ((args (cdr code))
+			(objs (butlast args))
+			(member (car (last args))))
 		   (with-output-to-string (s)
-		     (loop for e in nss do
+		     (loop for e in objs do
 			  (format s "~a->" (emit-cpp :code e)))
 		     (format s "~a"  (emit-cpp :code member)))))
 	 (ref  (destructuring-bind (object) (cdr code)
