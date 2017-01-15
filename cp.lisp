@@ -337,6 +337,14 @@
 
 *env-functions*
 
+(defmacro with-c-file ((f fn) &body body)
+  `(let ((,f (funcall fopen fn)))
+     ,@body))
+
+(sb-cltl2:macroexpand-all 
+ '(with-c-file (f "bla")
+   (funcall fprintf f "blb")))
+
 (with-output-to-string (s)
   (emit-cpp
    :str s
