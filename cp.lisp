@@ -53,7 +53,12 @@
    (substitute #\e #\d s)))
 
 
-(defun emit-cpp (&key code (str nil))
+(defparameter *env-functions* nil)
+(defparameter *env-macros* nil)
+(defun emit-cpp (&key code (str nil) (clear-env nil))
+  (when clear-env
+    (setf *env-functions* nil
+	  *env-macros* nil))
   (if code
       (if (listp code)
        (case (car code)
@@ -79,6 +84,15 @@
 		  (format s "}~%")))
 	 (go (destructuring-bind (name) (cdr code)
 	       (format str "goto ~a" name)))
+	 (defmacro (destructuring-bind ((name params) &rest macro-body) (cdr code)
+		     (push (list :name name
+				 :params params
+				 :body macro-body)
+			   *env-macros*)))
+	 (macrocall (destructuring-bind (name &rest rest) (cdr code)
+		      #+nil (format str "~a(~{~a~^,~})"
+			      (emit-cpp :code name)
+			      (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 	 (function (destructuring-bind ((name params &optional ret &key ctor specifier) &rest function-body) (cdr code)
 		     (let ((header (concatenate 'string
 						(when ret (format nil "~a " ret))
@@ -92,9 +106,18 @@
 							  (loop for (e f) in ctor collect
 							       (format nil " ~a( ~a )" e f)))))))
 		       (if function-body
-			   (concatenate 'string
-					header
-					(emit-cpp :code `(compound-statement ,@function-body)))
+			   (progn
+			     
+			     (push (list :name name
+					 :params params
+					 :ret ret
+					 :ctor ctor
+					 :specifier specifier
+					 :body function-body)
+				   *env-functions*)
+			    (concatenate 'string
+					 header
+					 (emit-cpp :code `(compound-statement ,@function-body))))
 			   (concatenate 'string header ";")))))
 	 (access-specifier (format str "~a:~%" (cadr code))
 			   ;; public, private or protected
@@ -311,6 +334,22 @@
 					    (print-sufficient-digits-f64 (realpart code))
 					    (print-sufficient-digits-f64 (imagpart code)))))))))))
       ""))
+
+*env-functions*
+
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(function (plus ((a :type int))
+			int)
+	 (return (+ a 3)))
+      (function (minus ((a :type int))
+		       int)
+		(return (- a 3))))))
 
 #+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
