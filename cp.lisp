@@ -89,10 +89,8 @@
 				 :params params
 				 :body macro-body)
 			   *env-macros*)))
-	 (macrocall (destructuring-bind (name &rest rest) (cdr code)
-		      #+nil (format str "~a(~{~a~^,~})"
-			      (emit-cpp :code name)
-			      (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
+	 (macroexpand (destructuring-bind (macro &rest rest) (cdr code)
+			(emit-cpp :code (macroexpand-1 macro))))
 	 (function (destructuring-bind ((name params &optional ret &key ctor specifier) &rest function-body) (cdr code)
 		     (let ((header (concatenate 'string
 						(when ret (format nil "~a " ret))
@@ -338,11 +336,18 @@
 *env-functions*
 
 (defmacro with-c-file ((f fn) &body body)
-  `(let ((,f (funcall fopen fn)))
+  `(let ((,f :type FILE :init (funcall fopen ,fn)
+	   ))
      ,@body))
 
-(sb-cltl2:macroexpand-all 
- '(with-c-file (f "bla")
+
+
+
+(defparameter *a* `(macroexpand-1  (with-c-file (f "bla")
+		       (funcall fprintf f "blb"))))
+
+(sb-cltl2:macroexpand-all
+ (with-c-file (f "bla")
    (funcall fprintf f "blb")))
 
 (with-output-to-string (s)
@@ -357,7 +362,9 @@
 	 (return (+ a 3)))
       (function (minus ((a :type int))
 		       int)
-		(return (- a 3))))))
+		(return (- a 3)))
+      (macroexpand (with-c-file (f "bla")
+		     (funcall fprintf f "blb"))))))
 
 #+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
