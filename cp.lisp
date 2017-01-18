@@ -90,7 +90,7 @@
 				 :body macro-body)
 			   *env-macros*)))
 	 (macroexpand (destructuring-bind (macro &rest rest) (cdr code)
-			(emit-cpp :code (macroexpand-1 macro))))
+			(format str "~a" (emit-cpp :code (macroexpand-1 macro)))))
 	 (function (destructuring-bind ((name params &optional ret &key ctor specifier) &rest function-body) (cdr code)
 		     (let ((header (concatenate 'string
 						(when ret (format nil "~a " ret))
@@ -105,7 +105,6 @@
 							       (format nil " ~a( ~a )" e f)))))))
 		       (if function-body
 			   (progn
-			     
 			     (push (list :name name
 					 :params params
 					 :ret ret
@@ -113,9 +112,9 @@
 					 :specifier specifier
 					 :body function-body)
 				   *env-functions*)
-			    (concatenate 'string
-					 header
-					 (emit-cpp :code `(compound-statement ,@function-body))))
+			     (concatenate 'string
+					  header
+					  (emit-cpp :code `(compound-statement ,@function-body))))
 			   (concatenate 'string header ";")))))
 	 (access-specifier (format str "~a:~%" (cadr code))
 			   ;; public, private or protected
@@ -262,7 +261,7 @@
 					       '(= return funcall raw go break)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let))
+		((member (second code) '(if for dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
@@ -333,8 +332,9 @@
 					    (print-sufficient-digits-f64 (imagpart code)))))))))))
       ""))
 
-*env-functions*
 
+
+#+nil
 (defmacro with-c-file ((f fn) &body body)
   `(let ((,f :type FILE :init (funcall fopen ,fn)
 	   ))
@@ -343,13 +343,9 @@
 
 
 
-(defparameter *a* `(macroexpand-1  (with-c-file (f "bla")
-		       (funcall fprintf f "blb"))))
 
-(sb-cltl2:macroexpand-all
- (with-c-file (f "bla")
-   (funcall fprintf f "blb")))
 
+#+nil
 (with-output-to-string (s)
   (emit-cpp
    :str s
