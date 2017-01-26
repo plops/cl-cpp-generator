@@ -40,7 +40,7 @@
 	 (s (format nil "~E" ff)))
    (assert (= 0s0 (- ff
 		     (read-from-string s))))
-   (substitute #\f #\e s)))
+   (substitute #\e #\f s)))
 
 (defun print-sufficient-digits-f64 (f)
   "print a double floating point number as a string with a given nr. of
