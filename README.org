@@ -115,8 +115,51 @@ foreach_active, cif, bit).
   (ql:quickload :cl-cpp-generator))
 
 (in-package :cl-cpp-generator)
-
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(dotimes (i (funcall max 2 3))
+	  (funcall bla))
+      (foreach (i (funcall max  1 0) (funcall min m n))
+	       (funcall ata))
+      (foreach ((i (funcall max  1 0) (funcall min m n))
+		(j 0 n))
+	       (funcall ata))
+      (foreach-active (i)
+		      (+= (aref a index) (bit #b0110)))
+      (function (func ((v :type "uniform int")) "extern void"))
+      (foreach-unique (val x)
+	       (funcall func val)))))
 #+END_SRC
+
+#+BEGIN_SRC c++
+for(int i = 0; (i < max(2,3)); i += 1) {
+  bla();
+}
+
+foreach(i = max(1,0) ... min(m,n)) {
+  ata();
+}
+
+foreach(i = max(1,0) ... min(m,n),j = 0 ... n) {
+  ata();
+}
+
+foreach_active(i) {
+  a[index] += 0b110;
+}
+
+extern void func(uniform int v);
+foreach_uniq(val in x) {
+  func(val);
+}
+#+END_SRC
+
+
 
 ** Example
 
