@@ -5,6 +5,119 @@ This project provides the Common Lisp function ~emit-cpp &key code
 str~. It receives a list of special s-expressions and emits
 corresponding C++ code into a string.
 
+
+** Installation
+
+Clone the repository into Quicklisps local-projects folder:
+
+#+BEGIN_SRC
+cd ~/quicklisp/local-projects
+git clone https://github.com/plops/cl-cpp-generator
+#+END_SRC
+
+If you want to add the code to a lisp that is alreay running, you will have to call:
+
+#+BEGIN_SRC common-lisp
+(ql:register-local-projects)
+#+END_SRC
+
+I don't think this is required if you start a new instance of Common
+Lisp. In that case quicklisp will find the new folder during its
+initialization.
+
+
+Place the following code into a .lisp file and execute the file, i.e. in Slime press C-c C-k.
+
+
+#+BEGIN_SRC common-lisp
+(eval-when (:compile-toplevel :execute :load-toplevel)
+  (ql:quickload :cl-cpp-generator))
+
+(in-package :cl-cpp-generator)
+
+(with-open-file (s "emitted_code.cpp"
+                   :direction :output
+                   :if-exists :supersede
+                   :if-does-not-exist :create)
+  (emit-cpp
+   :str s
+   :clear-env t
+   :code 
+   `(with-compilation-unit
+          (include <optixu/optixpp_namespace.h>))))
+#+END_SRC
+
+This will output a line with an include statement into the file
+emitted_code.cpp.  To write more you can add additional code in in the
+with-compilation-unit expression and re-execute the surrounding
+with-open-file with C-M-x.
+
+** Using macros
+
+This an example to that defines and uses a macro:
+
+#+BEGIN_SRC common-lisp
+(eval-when (:compile-toplevel :execute :load-toplevel)
+  (ql:quickload :cl-cpp-generator))
+
+(in-package :cl-cpp-generator)
+
+(defmacro with-glfw-window ((win &key (w 512) (h 512) (title "glfw")) &body body)
+  `(let ((,win :type GLFWwindow*))
+     (if (! (funcall glfwInit))
+	 (statements (return -1)))
+     (setf ,win (funcall glfwCreateWindow ,w ,h (string ,title) NULL NULL))
+     (if (! ,win)
+	 (statements (funcall glfwTerminate)
+		     (return -1)))
+     (funcall glfwMakeContextCurrent ,win)
+     ,@body
+     (funcall glfwTerminate)))
+
+
+(with-open-file (s "emitted_code.cpp"
+		      :direction :output
+		      :if-exists :supersede
+		      :if-does-not-exist :create)
+     (emit-cpp
+      :str s
+      :clear-env t
+      :code 
+      `(with-compilation-unit
+
+	   (function (main ((argc :type int)
+			    (argv :type char**))
+			   int)
+	    (decl ((argc :type (void))))
+	    (decl ((argv :type (void))))
+	    (macroexpand
+	     (with-glfw-window (main_window :w 512 :h 512)
+	       (for (() (! (funcall glfwWindowShouldClose main_window)) ())
+
+		    (funcall glClear GL_COLOR_BUFFER_BIT)
+		    
+		       
+		    (funcall glfwSwapBuffers main_window)
+		    
+		    (funcall glfwPollEvents))))
+	    (return 0)))))
+#+END_SRC
+
+** Support for ISPC (Intel SPMD Program Compiler) 
+
+If you add the keyword ispc to `*features*`, you can use the ispc
+specific control expressions (foreach, foreach_unique, foreach_tiled,
+foreach_active, cif, bit).
+
+#+BEGIN_SRC common-lisp
+(push :ispc *features*)
+(eval-when (:compile-toplevel :execute :load-toplevel)
+  (ql:quickload :cl-cpp-generator))
+
+(in-package :cl-cpp-generator)
+
+#+END_SRC
+
 ** Example
 
 #+BEGIN_SRC common-lisp
@@ -121,117 +234,6 @@ statement following that tag. A TAG must be an integer or a symbol. A
 STATEMENT must be a list. Other objects are illegal within the body.
 
 
-** Installation
-
-Clone the repository into Quicklisps local-projects folder:
-
-#+BEGIN_SRC
-cd ~/quicklisp/local-projects
-git clone https://github.com/plops/cl-cpp-generator
-#+END_SRC
-
-If you want to add the code to a lisp that is alreay running, you will have to call:
-
-#+BEGIN_SRC common-lisp
-(ql:register-local-projects)
-#+END_SRC
-
-I don't think this is required if you start a new instance of Common
-Lisp. In that case quicklisp will find the new folder during its
-initialization.
-
-
-Place the following code into a .lisp file and execute the file, i.e. in Slime press C-c C-k.
-
-
-#+BEGIN_SRC common-lisp
-(eval-when (:compile-toplevel :execute :load-toplevel)
-  (ql:quickload :cl-cpp-generator))
-
-(in-package :cl-cpp-generator)
-
-(with-open-file (s "emitted_code.cpp"
-                   :direction :output
-                   :if-exists :supersede
-                   :if-does-not-exist :create)
-  (emit-cpp
-   :str s
-   :clear-env t
-   :code 
-   `(with-compilation-unit
-          (include <optixu/optixpp_namespace.h>))))
-#+END_SRC
-
-This will output a line with an include statement into the file
-emitted_code.cpp.  To write more you can add additional code in in the
-with-compilation-unit expression and re-execute the surrounding
-with-open-file with C-M-x.
-
-** Using macros
-
-This an example to that defines and uses a macro:
-
-#+BEGIN_SRC common-lisp
-(eval-when (:compile-toplevel :execute :load-toplevel)
-  (ql:quickload :cl-cpp-generator))
-
-(in-package :cl-cpp-generator)
-
-(defmacro with-glfw-window ((win &key (w 512) (h 512) (title "glfw")) &body body)
-  `(let ((,win :type GLFWwindow*))
-     (if (! (funcall glfwInit))
-	 (statements (return -1)))
-     (setf ,win (funcall glfwCreateWindow ,w ,h (string ,title) NULL NULL))
-     (if (! ,win)
-	 (statements (funcall glfwTerminate)
-		     (return -1)))
-     (funcall glfwMakeContextCurrent ,win)
-     ,@body
-     (funcall glfwTerminate)))
-
-
-(with-open-file (s "emitted_code.cpp"
-		      :direction :output
-		      :if-exists :supersede
-		      :if-does-not-exist :create)
-     (emit-cpp
-      :str s
-      :clear-env t
-      :code 
-      `(with-compilation-unit
-
-	   (function (main ((argc :type int)
-			    (argv :type char**))
-			   int)
-	    (decl ((argc :type (void))))
-	    (decl ((argv :type (void))))
-	    (macroexpand
-	     (with-glfw-window (main_window :w 512 :h 512)
-	       (for (() (! (funcall glfwWindowShouldClose main_window)) ())
-
-		    (funcall glClear GL_COLOR_BUFFER_BIT)
-		    
-		       
-		    (funcall glfwSwapBuffers main_window)
-		    
-		    (funcall glfwPollEvents))))
-	    (return 0)))))
-#+END_SRC
-
-** Support for ISPC (Intel SPMD Program Compiler) 
-
-If you add the keyword ispc to `*features*`, you can use the ispc
-specific control expressions (foreach, foreach_unique, foreach_tiled,
-foreach_active, cif, bit).
-
-#+BEGIN_SRC common-lisp
-(push :ispc *features*)
-(eval-when (:compile-toplevel :execute :load-toplevel)
-  (ql:quickload :cl-cpp-generator))
-
-(in-package :cl-cpp-generator)
-
-#+END_SRC
 
 
 ** References
