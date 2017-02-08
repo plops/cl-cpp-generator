@@ -164,6 +164,18 @@
 					  header
 					  (emit-cpp :code `(compound-statement ,@function-body))))
 			   (concatenate 'string header ";")))))
+	 (lambda (destructuring-bind ((captures params &key ret specifiers) &rest function-body) (cdr code)
+		     (let ((header (concatenate 'string
+						
+						(format nil "[~{~a~^,~}](~{~a~^,~})"
+							captures
+							(emit-cpp :code `(:params ,params)))
+						(when specifiers
+						  (format nil "~{ ~a~}" specifiers))
+						(when ret (format nil "~a " ret)))))
+		       (concatenate 'string
+				    header
+				    (emit-cpp :code `(compound-statement ,@function-body))))))
 	 (access-specifier (format str "~a:~%" (cadr code))
 			   ;; public, private or protected
 			   )
