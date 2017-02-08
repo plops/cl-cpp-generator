@@ -220,6 +220,11 @@
 				   (emit-cpp :code start) (emit-cpp :code n)
 				   (emit-cpp :code `(compound-statement ,@body)))
 			   ))
+	 #+ispc (foreach-active (destructuring-bind ((var) &rest body) (cdr code) ;; foreach_active (i) {
+				  (format str "foreach_active(~a) ~a"
+				   var
+				   (emit-cpp :code `(compound-statement ,@body)))))
+	 
 	 (dotimes (destructuring-bind ((var n) &rest body) (cdr code)
 		    (emit-cpp :code `(for ((,var 0 :type int) (< ,var ,(emit-cpp :code n)) (+= ,var 1))
 					  ,@body))))
@@ -422,7 +427,9 @@
 	(dotimes (i (funcall max 2 3))
 	  (funcall bla))
       (foreach (i (funcall max  1 0) (funcall min m n))
-	       (funcall ata)))))
+	       (funcall ata))
+      (foreach-active (i)
+	       (+= (aref a index) 1)))))
 
 #+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
