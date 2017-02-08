@@ -214,11 +214,19 @@
 			    (emit-cpp :code update-expression-opt)
 			    "")
 			(emit-cpp :code `(compound-statement ,@statement-list)))))
-	 #+ispc (foreach (destructuring-bind ((var start n) &rest body) (cdr code) ;; foreach (i = 0 ... width) {
-			   (format str "foreach(~a = ~a ... ~a) ~a"
-				   var
-				   (emit-cpp :code start) (emit-cpp :code n)
-				   (emit-cpp :code `(compound-statement ,@body)))
+	 #+ispc (foreach (destructuring-bind (head &rest body) (cdr code) 
+			   (if (listp (car head))
+			       (progn  ;; foreach (i = 0 ... width, j = 1 .. height) {
+				 (format str "foreach(~{~a~^,~}) ~a"
+					 (loop for (var start n) in head collect
+					      (format nil "~a = ~a ... ~a"
+						      var (emit-cpp :code start) (emit-cpp :code n)))
+					 (emit-cpp :code `(compound-statement ,@body)))
+				 )
+			       (destructuring-bind (var start n) head ;; foreach (i = 0 ... width) {
+				(format str "foreach(~a = ~a ... ~a) ~a"
+					var (emit-cpp :code start) (emit-cpp :code n)
+					(emit-cpp :code `(compound-statement ,@body)))))
 			   ))
 	 #+ispc (foreach-active (destructuring-bind ((var) &rest body) (cdr code) ;; foreach_active (i) {
 				  (format str "foreach_active(~a) ~a"
@@ -419,16 +427,6 @@
      ,@body))
 
 
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; int x = ...; // assume {1, 2, 2, 1, 1, 0, 0, 0} ;;
-;; foreach_unique (val in x) {			   ;;
-;;     extern void func(uniform int v);		   ;;
-;;     func(val);				   ;;
-;; }						   ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 #+nil
 (with-output-to-string (s)
   (emit-cpp
@@ -440,6 +438,9 @@
 	(dotimes (i (funcall max 2 3))
 	  (funcall bla))
       (foreach (i (funcall max  1 0) (funcall min m n))
+	       (funcall ata))
+      (foreach ((i (funcall max  1 0) (funcall min m n))
+		(j 0 n))
 	       (funcall ata))
       (foreach-active (i)
 		      (+= (aref a index) 1))
