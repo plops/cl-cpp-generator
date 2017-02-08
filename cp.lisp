@@ -214,13 +214,12 @@
 			    (emit-cpp :code update-expression-opt)
 			    "")
 			(emit-cpp :code `(compound-statement ,@statement-list)))))
-	 #+ispc (foreach (destructuring-bind ((var n) &rest body) (cdr code) ;; foreach (i = 0 ... width) {
+	 #+ispc (foreach (destructuring-bind ((var start n) &rest body) (cdr code) ;; foreach (i = 0 ... width) {
 			   (format str "foreach(~a = ~a ... ~a) ~a"
 				   var
-				   (emit-cpp :code n)
+				   (emit-cpp :code start) (emit-cpp :code n)
 				   (emit-cpp :code `(compound-statement ,@body)))
-		    (emit-cpp :code `(for ((,var 0 :type int) (< ,var ,n) (+= ,var 1))
-					  ,@body))))
+			   ))
 	 (dotimes (destructuring-bind ((var n) &rest body) (cdr code)
 		    (emit-cpp :code `(for ((,var 0 :type int) (< ,var ,(emit-cpp :code n)) (+= ,var 1))
 					  ,@body))))
@@ -422,9 +421,8 @@
    `(with-compilation-unit
 	(dotimes (i (funcall max 2 3))
 	  (funcall bla))
-      (function (minus ((a :type int))
-		       int)
-		(return (- a 3))))))
+      (foreach (i (funcall max  1 0) (funcall min m n))
+	       (funcall ata)))))
 
 #+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
@@ -433,6 +431,7 @@
 	      '(with-compilation-unit
 		(for ((i a :type int) (< i n) (+= i 1))
 		 (+= b q))
+		
 		)))
 
 (defun compile-cpp (fn code &key options)
