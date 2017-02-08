@@ -161,7 +161,7 @@
 					 :body function-body)
 				   *env-functions*)
 			     (concatenate 'string
-					  header
+					  header 
 					  (emit-cpp :code `(compound-statement ,@function-body))))
 			   (concatenate 'string header ";")))))
 	 (lambda (destructuring-bind ((captures params &key ret specifiers) &rest function-body) (cdr code)
