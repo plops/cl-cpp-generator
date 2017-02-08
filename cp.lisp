@@ -226,8 +226,20 @@
 			       (destructuring-bind (var start n) head ;; foreach (i = 0 ... width) {
 				(format str "foreach(~a = ~a ... ~a) ~a"
 					var (emit-cpp :code start) (emit-cpp :code n)
-					(emit-cpp :code `(compound-statement ,@body)))))
-			   ))
+					(emit-cpp :code `(compound-statement ,@body)))))))
+	 #+ispc (foreach-tiled (destructuring-bind (head &rest body) (cdr code)  ;; same semantics as foreach
+			   (if (listp (car head))
+			       (progn  ;; foreach_tiled (i = 0 ... width, j = 1 .. height) {
+				 (format str "foreach_tiled(~{~a~^,~}) ~a"
+					 (loop for (var start n) in head collect
+					      (format nil "~a = ~a ... ~a"
+						      var (emit-cpp :code start) (emit-cpp :code n)))
+					 (emit-cpp :code `(compound-statement ,@body)))
+				 )
+			       (destructuring-bind (var start n) head ;; foreach_tiled (i = 0 ... width) {
+				(format str "foreach_tiled(~a = ~a ... ~a) ~a"
+					var (emit-cpp :code start) (emit-cpp :code n)
+					(emit-cpp :code `(compound-statement ,@body)))))))
 	 #+ispc (foreach-active (destructuring-bind ((var) &rest body) (cdr code) ;; foreach_active (i) {
 				  (format str "foreach_active(~a) ~a"
 				   var
