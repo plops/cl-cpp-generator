@@ -224,6 +224,13 @@
 				  (format str "foreach_active(~a) ~a"
 				   var
 				   (emit-cpp :code `(compound-statement ,@body)))))
+
+	 #+ispc (foreach-unique (destructuring-bind ((var seq) &rest body) (cdr code) ;; foreach_unique (val in x) {			  
+				  (format str "foreach_uniq(~a in ~a) ~a"
+					  var
+					  (emit-cpp :code seq)
+					  (emit-cpp :code `(compound-statement ,@body)))))
+
 	 
 	 (dotimes (destructuring-bind ((var n) &rest body) (cdr code)
 		    (emit-cpp :code `(for ((,var 0 :type int) (< ,var ,(emit-cpp :code n)) (+= ,var 1))
@@ -414,7 +421,13 @@
 
 
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; int x = ...; // assume {1, 2, 2, 1, 1, 0, 0, 0} ;;
+;; foreach_unique (val in x) {			   ;;
+;;     extern void func(uniform int v);		   ;;
+;;     func(val);				   ;;
+;; }						   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #+nil
 (with-output-to-string (s)
@@ -429,7 +442,10 @@
       (foreach (i (funcall max  1 0) (funcall min m n))
 	       (funcall ata))
       (foreach-active (i)
-	       (+= (aref a index) 1)))))
+		      (+= (aref a index) 1))
+      (function (func ((v :type "uniform int")) "extern void"))
+      (foreach-unique (val x)
+	       (funcall func val)))))
 
 #+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
