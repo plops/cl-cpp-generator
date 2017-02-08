@@ -225,7 +225,7 @@ specific control expressions (foreach, foreach_unique, foreach_tiled,
 foreach_active, cif, bit).
 
 #+BEGIN_SRC common-lisp
-(push :ispc *feature*
+(push :ispc *features*)
 (eval-when (:compile-toplevel :execute :load-toplevel)
   (ql:quickload :cl-cpp-generator))
 
