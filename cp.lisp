@@ -1,5 +1,34 @@
 (defpackage :cl-cpp-generator
-  (:use :cl))
+  (:use :cl)
+  (:export
+   #:include
+   #:compound-statement
+   #:statements
+   #:tagbody
+   #:go
+   #:defmacro
+   #:macroexpand
+   #:function
+   #:access-specifier
+   #:with-namespace
+   #:with-compilation-unit
+   #:enum
+   #:decl
+   #:break
+   #:extern-c
+   #:raw
+   #:cast
+   #:ns
+   #:slot->value
+   #:ref
+   #:deref
+   #:hex
+   #:comma-list
+   #:lisp
+   #:statement))
+
+(defpackage :cl-cpp-generator-macros
+  (:use :cl :cl-cpp-generator))
 (in-package :cl-cpp-generator)
 
 (setf (readtable-case *readtable*) :invert)
@@ -52,6 +81,22 @@
 		     (read-from-string s))))
    (substitute #\e #\d s)))
 
+(defun get-all-macros (&optional package)
+  (let ((lst ())
+        (package (find-package package)))
+    (do-all-symbols (s lst)
+      (when (fboundp s)
+	(when (macro-function s)
+	 (if package
+	     (when (eql (symbol-package s) package)
+	      
+	       (push s lst))
+	     (push s lst)))))
+    lst))
+
+#+nil
+(get-all-macros 'cl-cpp-generator)
+
 
 (defparameter *env-functions* nil)
 (defparameter *env-macros* nil)
@@ -90,7 +135,10 @@
 				 :body macro-body)
 			   *env-macros*)))
 	 (macroexpand (destructuring-bind (macro &rest rest) (cdr code)
-			(format str "~a" (emit-cpp :code (macroexpand-1 macro)))))
+			(format str "~a" #+nil (intern (string-upcase (format nil "~a" macro)) :cl-cpp-generator-macros)
+				(emit-cpp :code (macroexpand-1 macro)
+						   
+						   ))))
 	 (function (destructuring-bind ((name params &optional ret &key ctor specifier) &rest function-body) (cdr code)
 		     (let ((header (concatenate 'string
 						(when ret (format nil "~a " ret))
@@ -166,10 +214,25 @@
 			    (emit-cpp :code update-expression-opt)
 			    "")
 			(emit-cpp :code `(compound-statement ,@statement-list)))))
-	 (dotimes (destructuring-bind ((var n) &rest body) (cdr code)
+	 #+ispc (foreach (destructuring-bind ((var n) &rest body) (cdr code) ;; foreach (i = 0 ... width) {
+			   (format str "foreach(~a = ~a ... ~a) ~a"
+				   var
+				   (emit-cpp :code n)
+				   (emit-cpp :code `(compound-statement ,@body)))
 		    (emit-cpp :code `(for ((,var 0 :type int) (< ,var ,n) (+= ,var 1))
 					  ,@body))))
+	 (dotimes (destructuring-bind ((var n) &rest body) (cdr code)
+		    (emit-cpp :code `(for ((,var 0 :type int) (< ,var ,(emit-cpp :code n)) (+= ,var 1))
+					  ,@body))))
 	 (if (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
+	       (with-output-to-string (s)
+		 (format s "if ( ~a ) ~a"
+			 (emit-cpp :code condition)
+			 (emit-cpp :code `(compound-statement ,true-statement)))
+		 (when false-statement
+		  (format s "else ~a"
+			  (emit-cpp :code `(compound-statement ,false-statement)))))))
+	 #+ispc (cif (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
 	       (with-output-to-string (s)
 		 (format s "if ( ~a ) ~a"
 			 (emit-cpp :code condition)
@@ -305,6 +368,9 @@
 			    (emit-cpp :code left)
 			    op
 			    (emit-cpp :code right))))
+		  #+nil ((member (car code) (get-all-macros 'cl-cpp-generator-macros))
+			 ;; if it is a macro in the cl-cpp-generator package, then expand it
+			 (emit-cpp :code `(macroexpand ,@code)))
 		  (t (format nil "not processable: ~a" code)))))
        (cond
 	 ((or (symbolp code)
@@ -329,7 +395,8 @@
 			(substitute #\e #\d
 				    (format nil "((~a) + (~ai))"
 					    (print-sufficient-digits-f64 (realpart code))
-					    (print-sufficient-digits-f64 (imagpart code)))))))))))
+					    (print-sufficient-digits-f64 (imagpart code)))))))))
+	 ))
       ""))
 
 
@@ -353,14 +420,11 @@
    
    :code 
    `(with-compilation-unit
-	(function (plus ((a :type int))
-			int)
-	 (return (+ a 3)))
+	(dotimes (i (funcall max 2 3))
+	  (funcall bla))
       (function (minus ((a :type int))
 		       int)
-		(return (- a 3)))
-      (macroexpand (with-c-file (f "bla")
-		     (funcall fprintf f "blb"))))))
+		(return (- a 3))))))
 
 #+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
