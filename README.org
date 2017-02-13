@@ -290,3 +290,5 @@ STATEMENT must be a list. Other objects are illegal within the body.
 - https://github.com/shirok/Gauche/blob/master/lib/gauche/cgen/cise.scm
 
 - https://news.ycombinator.com/item?id=13199610
+
+- https://github.com/kiselgra/c-mera
