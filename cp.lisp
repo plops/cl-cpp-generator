@@ -196,6 +196,9 @@
 				(if (listp e)
 				    (format nil "~a = ~a" (first e) (emit-cpp :code (second e)))
 				    (format nil "~a" e)))))))
+	 (new (format str "new ~a" (emit-cpp :code (cadr code))))
+	 (delete (format str "delete ~a" (emit-cpp :code (cadr code))))
+	 (delete[] (format str "delete [] ~a" (emit-cpp :code (cadr code))))
 	 (decl (destructuring-bind (bindings) (cdr code)
 		 (with-output-to-string (s)
 		   (loop for e  in bindings do
@@ -366,7 +369,7 @@
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(= return funcall raw go break)))
+					       '(= return funcall raw go break new delete delete[])))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
 		((member (second code) '(if for dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand))
@@ -451,6 +454,18 @@
   `(let ((,f :type FILE :init (funcall fopen ,fn)
 	   ))
      ,@body))
+
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	
+	(let ((buf :type "unsigned char*" :init (new (aref "unsigned char" size))))
+	  (delete[] buf)))))
 
 
 #+nil
