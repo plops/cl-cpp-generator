@@ -210,7 +210,7 @@
 			      (if ctor
 				  (format s "( ~a )" (emit-cpp :code ctor))
 				  ))
-			 ; (format s ";~%")
+			  (format s ";~%")
 			  )))))
 	 (let (destructuring-bind (bindings &rest rest) (cdr code)
 		(emit-cpp :code `(compound-statement
@@ -235,8 +235,9 @@
 		  (cdr code)
 		(format str "for(~a : ~a) ~a"
 			(if (atom var-decl)
-			    (emit-cpp :code `(decl ((,var-decl :type auto))))
-			    (emit-cpp :code `(decl (,var-decl))))
+			    (format nil "auto ~a" var-decl)
+			    (destructuring-bind (name &key (type 'auto)) var-decl
+			      (format nil "~a ~a" type name)))
 			(emit-cpp :code range)
 			(emit-cpp :code `(compound-statement ,@statement-list)))))
 	 #+ispc (foreach (destructuring-bind (head &rest body) (cdr code) 
