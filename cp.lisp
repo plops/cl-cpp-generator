@@ -210,7 +210,8 @@
 			      (if ctor
 				  (format s "( ~a )" (emit-cpp :code ctor))
 				  ))
-			  (format s ";~%"))))))
+			 ; (format s ";~%")
+			  )))))
 	 (let (destructuring-bind (bindings &rest rest) (cdr code)
 		(emit-cpp :code `(compound-statement
 				     (decl ,bindings)
@@ -228,6 +229,15 @@
 			(if update-expression-opt
 			    (emit-cpp :code update-expression-opt)
 			    "")
+			(emit-cpp :code `(compound-statement ,@statement-list)))))
+	 #-conly
+	 (for-range (destructuring-bind ((var-decl range) &rest statement-list)
+		  (cdr code)
+		(format str "for(~a : ~a) ~a"
+			(if (atom var-decl)
+			    (emit-cpp :code `(decl ((,var-decl :type auto))))
+			    (emit-cpp :code `(decl (,var-decl))))
+			(emit-cpp :code range)
 			(emit-cpp :code `(compound-statement ,@statement-list)))))
 	 #+ispc (foreach (destructuring-bind (head &rest body) (cdr code) 
 			   (if (listp (car head))
@@ -369,7 +379,7 @@
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(= return funcall raw go break new delete delete[])))
+					       '(= return funcall raw go break new delete delete[] decl)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
 		((member (second code) '(if for dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand))
@@ -454,6 +464,18 @@
   `(let ((,f :type FILE :init (funcall fopen ,fn)
 	   ))
      ,@body))
+
+;; for (auto&& entry : boost::make_iterator_range (fs::directory_iterator ("."), {})) { ;;
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(for-range (e (funcall make_iterator_range (string ".") (list ))))
+      (for-range ((e :type "auto&&") (funcall make_iterator_range (string ".") (list )))))))
 
 #+nil
 (with-output-to-string (s)
