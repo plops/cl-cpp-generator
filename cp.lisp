@@ -289,6 +289,14 @@
 		 (when false-statement
 		  (format s "else ~a"
 			  (emit-cpp :code `(compound-statement ,false-statement)))))))
+	 (? (destructuring-bind (condition true-statement &optional false-statement) (cdr code) ;; ternery if, note: user should supply multiple statements as a comma-list
+	       (with-output-to-string (s)
+		 (format s "( ~a ) ? ( ~a )"
+			 (emit-cpp :code condition)
+			 (emit-cpp :code true-statement))
+		 (when false-statement
+		  (format s ": ( ~a )"
+			  (emit-cpp :code false-statement))))))
 	 #+ispc (cif (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
 	       (with-output-to-string (s)
 		 (format s "if ( ~a ) ~a"
@@ -329,7 +337,8 @@
 			      (emit-cpp :code name)
 			      (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 	 (extern-c (destructuring-bind (&rest rest) (cdr code)
-		     (format str "extern \"C\" {~%~{~a~^~%~}} // extern \"C\"~%"
+		     (format str "extern \"C\" {~%~{~a~^~%~}} // ex
+tern \"C\"~%"
 				 (loop for e in rest collect 
 				      (emit-cpp :code e)))))
 	 (raw (destructuring-bind (string) (cdr code)
@@ -380,7 +389,7 @@
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(= return funcall raw go break new delete delete[] decl)))
+					       '(= return funcall raw go break new delete delete[] decl ?)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
 		((member (second code) '(if for-range for dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand))
@@ -467,6 +476,22 @@
      ,@body))
 
 ;; for (auto&& entry : boost::make_iterator_range (fs::directory_iterator ("."), {})) { ;;
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(statements (? a b c))
+      (? (<  a b) x)
+      (? (&& (<= 0 h) (< h 24))
+	 (= hour h)
+	 (comma-list (<< cout (string "bla")) (= hour 0))
+	 ))))
+;;  http://stackoverflow.com/questions/16676821/c-multiple-statements-for-conditional-operator
+;; ( h >= 0 && h < 24) ? ( hour = h) : (std::cout << "Invalid Hour Detected\n", hour = 0);
 #+nil
 (with-output-to-string (s)
   (emit-cpp
