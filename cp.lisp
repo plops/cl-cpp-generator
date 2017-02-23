@@ -514,6 +514,16 @@
 	(let ((buf :type "unsigned char*" :init (new (aref "unsigned char" size))))
 	  (delete[] buf)))))
 
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(lambda (() ()) ))))
+
 
 #+nil
 (with-output-to-string (s)
