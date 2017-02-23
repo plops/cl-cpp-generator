@@ -164,7 +164,7 @@
 					  header 
 					  (emit-cpp :code `(compound-statement ,@function-body))))
 			   (concatenate 'string header ";")))))
-	 (lambda (destructuring-bind ((captures params &key ret specifiers) &rest function-body) (cdr code)
+	 (lambda (destructuring-bind ((params &key captures ret specifiers) &rest function-body) (cdr code)
 		     (let ((header (concatenate 'string
 						
 						(format nil "[~{~a~^,~}](~{~a~^,~})"
@@ -522,7 +522,7 @@
    
    :code 
    `(with-compilation-unit
-	(lambda (() ()) ))))
+	(lambda ()  ))))
 
 
 #+nil
