@@ -388,7 +388,7 @@
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(= return funcall raw go break new delete delete[] decl ?)))
+					       '(= return funcall raw go break new delete delete[] ?)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
 		((member (second code) '(if for-range for dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand))
