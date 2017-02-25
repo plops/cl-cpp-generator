@@ -296,3 +296,7 @@ STATEMENT must be a list. Other objects are illegal within the body.
 - https://github.com/eratosthenesia/lispc
   
 - https://github.com/cbaggers/varjo
+  
+- https://software.intel.com/en-us/articles/the-ultimate-question-of-programming-refactoring-and-everything
+
+- clang tooling https://clang.llvm.org/docs/LibASTMatchersTutorial.html

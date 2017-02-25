@@ -31,6 +31,7 @@
   (:use :cl :cl-cpp-generator))
 (in-package :cl-cpp-generator)
 
+
 (setf (readtable-case *readtable*) :invert)
 
 
@@ -391,7 +392,7 @@
 					       '(= return funcall raw go break new delete delete[] ?)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for-range for dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand))
+		((member (second code) '(if for-range for foreach foreach-unique foreach-tiled foreach-active dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
@@ -544,7 +545,18 @@
 		      (+= (aref a index) (bit #b0110)))
       (function (func ((v :type "uniform int")) "extern void"))
       (foreach-unique (val x)
-	       (funcall func val)))))
+		      (funcall func val))
+      (let ((dx :type float :init (/ (- x1 x0) width))
+			 (dy :type float :init (/ (- y1 y0) height))
+			 )
+		     (foreach (i (funcall max  1 0) (funcall min m n))
+			      (funcall ata))
+		     #+nil (foreach (i 0 width)
+			      (let ((x :type float :init (+ x0 (* i dx)))
+				    (y :type float :init (+ y0 (* i dy)))
+				    (index :type int :init (+ i (* j width)))
+				    )
+				(setf (aref output index) (funcall mandel x y #+nil max_iterations))))))))
 
 #+nil
 (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
