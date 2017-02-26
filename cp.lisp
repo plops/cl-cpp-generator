@@ -203,9 +203,11 @@
 	 (decl (destructuring-bind (bindings) (cdr code)
 		 (with-output-to-string (s)
 		   (loop for e  in bindings do
-			(destructuring-bind (name &key (type 'auto) init ctor) e
+			(destructuring-bind (name &key (type 'auto) init ctor extra) e
 			  (format s "~a ~a"
 				  type (emit-cpp :code name))
+			  (if extra
+			      (format s "~a" (emit-cpp :code extra)))
 			  (if init
 			      (format s " = ~a" (emit-cpp :code init))
 			      (if ctor
@@ -514,6 +516,19 @@
 	
 	(let ((buf :type "unsigned char*" :init (new (aref "unsigned char" size))))
 	  (delete[] buf)))))
+
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	
+	(let (((aref buf (* width height)) :type "static int" :extra (raw " __attribute__((aligned(64)))")))))))
+
+
 
 #+nil
 (with-output-to-string (s)
