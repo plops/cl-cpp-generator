@@ -551,7 +551,7 @@
    
    :code 
    `(with-compilation-unit
-	(lambda ()  ))))
+	(lambda (((i :type int)) :ret "->int")  ))))
 
 
 #+nil
