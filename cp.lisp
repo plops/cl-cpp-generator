@@ -109,8 +109,10 @@
       (if (listp code)
        (case (car code)
 	 (:params (loop for e in (cadr code) collect
-		       (destructuring-bind (name &key type) e
-			 (format str "~a ~a" type name))))
+		       (destructuring-bind (name &key type default) e
+			 (if default
+			     (format str "~a ~a = ~a" type name (emit-cpp :code default))
+			     (format str "~a ~a" type name)))))
 	 (include (format str "#include ~s" (cadr code)))
 	 (compound-statement (with-output-to-string (s)
 			       (format s "{~%")
@@ -492,6 +494,17 @@
 	 (= hour h)
 	 (comma-list (<< cout (string "bla")) (= hour 0))
 	 ))))
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(function (blah ((a :type int :default 3)))
+	 (raw "// "))
+	)))
 ;;  http://stackoverflow.com/questions/16676821/c-multiple-statements-for-conditional-operator
 ;; ( h >= 0 && h < 24) ? ( hour = h) : (std::cout << "Invalid Hour Detected\n", hour = 0);
 #+nil
