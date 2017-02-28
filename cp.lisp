@@ -700,4 +700,18 @@
   (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
 
+;; http://stackoverflow.com/questions/31394507/how-can-i-emulate-destructuring-in-c
+;; struct animal {
+;;     std::string species;
+;;     int weight;
+;;     std::string sound;
+;; };
 
+;; int main()
+;; {
+;;   auto pluto = animal { "dog", 23, "woof" };
+
+;;   auto [ species, weight, sound ] = pluto;
+
+;;   std::cout << "species=" << species << " weight=" << weight << " sound=" << sound << "\n";
+;; }
