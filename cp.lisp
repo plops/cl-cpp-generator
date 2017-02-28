@@ -59,6 +59,19 @@
 (defparameter *class-key*
   '(class struct union))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (bla #\0)					 ;;
+;; (bla 56)					 ;;
+;; (bla "a")					 ;;
+;; (type-of "a")				 ;;
+;; (defun bla (a)				 ;;
+;;  (typecase a					 ;;
+;;    (standard-char (format nil "'~a'" a))	 ;;
+;;    (number (format nil "'~a'" (code-char a))) ;;
+;;    (string (format nil "'~a'" (elt a 0)))))	 ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 #+nil
 (trace emit-cpp)
 
@@ -376,6 +389,12 @@
 		   (format str "(*(~a))" (emit-cpp :code object))))
 	 (hex (destructuring-bind (number) (cdr code)
 		(format str "0x~x" number)))
+	 (char (destructuring-bind (a) (cdr code)
+		 (typecase a
+		   (standard-char (format str "'~a'" a))
+		   (number (format str "'~a'" (code-char a)))
+		   (string (format str "'~a'" (elt a 0))))
+		 ))
 	 #+ispc (bit (destructuring-bind (number) (cdr code)
 		       (format str "0b~b" number)))
 	 (string (destructuring-bind (string) (cdr code)
