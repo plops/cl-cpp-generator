@@ -277,9 +277,29 @@ statement following that tag. A TAG must be an integer or a symbol. A
 STATEMENT must be a list. Other objects are illegal within the body.
 
 
+** Problem
+
+
+(if (== current_pattern_number pattern_number) ...
+
+source/libview.cpp:265:41: warning: equality comparison with extraneous parentheses
+      [-Wparentheses-equality]
+            if ((current_pattern_number == pattern_number)) {
+                 ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+source/libview.cpp:265:41: note: remove extraneous parentheses around the comparison to silence this
+      warning
+            if ((current_pattern_number == pattern_number)) {
+                ~                       ^                ~
+source/libview.cpp:265:41: note: use '=' to turn this equality comparison into an assignment
+            if ((current_pattern_number == pattern_number)) {
+                                        ^~
+                                        =
+
 
 
 ** References
+
+
 
 - how to write a dsl in lisp: https://www.youtube.com/watch?v=5FlHq_iiDW0
 
@@ -300,3 +320,4 @@ STATEMENT must be a list. Other objects are illegal within the body.
 - https://software.intel.com/en-us/articles/the-ultimate-question-of-programming-refactoring-and-everything
 
 - clang tooling https://clang.llvm.org/docs/LibASTMatchersTutorial.html
+  
