@@ -438,7 +438,7 @@
 					       '(= return funcall raw go break new delete delete[] ?)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for-range for foreach foreach-unique foreach-tiled foreach-active dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand))
+		((member (second code) '(if for-range do-while while for foreach foreach-unique foreach-tiled foreach-active dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
