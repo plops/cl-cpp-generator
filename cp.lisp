@@ -264,7 +264,7 @@
 		(format str "while(~a) ~a"
 			(emit-cpp :code condition)
 			(emit-cpp :code `(compound-statement ,@statement-list)))))
-	 (until (destructuring-bind (condition &rest statement-list)
+	 (do-while (destructuring-bind (condition &rest statement-list)
 		  (cdr code)
 		  (format str "do ~a while ( ~a )"
 			  (emit-cpp :code `(compound-statement ,@statement-list))
@@ -613,7 +613,7 @@
    :code 
    `(with-compilation-unit
 	(while (< 1 a) (+= 1 a) (setf a b))
-      (until (< 1 a) (+= 1 a) (setf a b)))))
+      (do-while (< 1 a) (+= 1 a) (setf a b)))))
 
 
 #+nil
