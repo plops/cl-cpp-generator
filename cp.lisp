@@ -569,6 +569,15 @@
 	
 	(let (((aref buf (* width height)) :type "static int" :extra (raw " __attribute__((aligned(64)))")))))))
 
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(enum-class ProtocolType IP ICMP RAW))))
+
 
 
 #+nil
