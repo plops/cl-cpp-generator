@@ -212,6 +212,15 @@
 				(if (listp e)
 				    (format nil "~a = ~a" (first e) (emit-cpp :code (second e)))
 				    (format nil "~a" e)))))))
+	 (enum-class (destructuring-bind (name &rest rest) (cdr code)
+		 ;; C++11
+		 (with-output-to-string (s)
+		   (format s "enum class ~a {~{ ~a~^,~}};~%"
+			   (if name name "")
+			   (loop for e in rest collect
+				(if (listp e)
+				    (format nil "~a = ~a" (first e) (emit-cpp :code (second e)))
+				    (format nil "~a" e)))))))
 	 (new (format str "new ~a" (emit-cpp :code (cadr code))))
 	 (delete (format str "delete ~a" (emit-cpp :code (cadr code))))
 	 (delete[] (format str "delete [] ~a" (emit-cpp :code (cadr code))))
