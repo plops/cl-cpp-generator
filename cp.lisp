@@ -258,6 +258,19 @@
 			    (emit-cpp :code update-expression-opt)
 			    "")
 			(emit-cpp :code `(compound-statement ,@statement-list)))))
+
+	 (while (destructuring-bind (condition &rest statement-list)
+		  (cdr code)
+		(format str "while(~a) ~a"
+			(emit-cpp :code condition)
+			(emit-cpp :code `(compound-statement ,@statement-list)))))
+	 (until (destructuring-bind (condition &rest statement-list)
+		  (cdr code)
+		  (format str "do ~a while ( ~a )"
+			  (emit-cpp :code `(compound-statement ,@statement-list))
+			  (emit-cpp :code condition)
+			)))
+	 
 	 #-conly
 	 (for-range (destructuring-bind ((var-decl range) &rest statement-list)
 		  (cdr code)
@@ -591,6 +604,16 @@
    :code 
    `(with-compilation-unit
 	(lambda (((i :type int)) :ret "->int")  ))))
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(while (< 1 a) (+= 1 a) (setf a b))
+      (until (< 1 a) (+= 1 a) (setf a b)))))
 
 
 #+nil
