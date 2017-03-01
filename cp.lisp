@@ -212,11 +212,12 @@
 				(if (listp e)
 				    (format nil "~a = ~a" (first e) (emit-cpp :code (second e)))
 				    (format nil "~a" e)))))))
-	 (enum-class (destructuring-bind (name &rest rest) (cdr code)
+	 (enum-class (destructuring-bind ((name &key type) &rest rest) (cdr code)
 		 ;; C++11
 		 (with-output-to-string (s)
-		   (format s "enum class ~a {~{ ~a~^,~}};~%"
+		   (format s "enum class ~a ~a {~{ ~a~^,~}};~%"
 			   (if name name "")
+			   (if type (format nil ": ~a" type) "")
 			   (loop for e in rest collect
 				(if (listp e)
 				    (format nil "~a = ~a" (first e) (emit-cpp :code (second e)))
@@ -568,7 +569,7 @@
    `(with-compilation-unit
 	
 	(let (((aref buf (* width height)) :type "static int" :extra (raw " __attribute__((aligned(64)))")))))))
-
+#+nil
 (with-output-to-string (s)
   (emit-cpp
    :str s
@@ -576,7 +577,8 @@
    
    :code 
    `(with-compilation-unit
-	(enum-class ProtocolType IP ICMP RAW))))
+	(enum-class (ProtocolType) IP ICMP RAW)
+      (enum-class (fruit :type uint8_t) apple melon))))
 
 
 
