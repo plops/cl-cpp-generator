@@ -320,7 +320,7 @@
 
 	 
 	 (dotimes (destructuring-bind ((var n) &rest body) (cdr code)
-		    (emit-cpp :code `(for ((,var 0 :type int) (< ,var ,(emit-cpp :code n)) (+= ,var 1))
+		    (emit-cpp :code `(for ((,var 0 :type "unsigned int") (< ,var ,(emit-cpp :code n)) (+= ,var 1))
 					  ,@body))))
 	 (if (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
 	       (with-output-to-string (s)
