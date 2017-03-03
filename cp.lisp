@@ -51,7 +51,7 @@
   '(* / % + - ^ & |\|| << >>))
 
 (defparameter *logical-operator-symbol*
-  '(== != < > <= >= && ||||))
+  '(== != < > <= >= && |\|\||))
 
 (defparameter *computed-assignment-operator-symbol*
   '(*= /= %= += -= ^= &= |\|=| <<= >>=))
@@ -614,6 +614,16 @@
    `(with-compilation-unit
 	(while (< 1 a) (+= 1 a) (setf a b))
       (do-while (< 1 a) (+= 1 a) (setf a b)))))
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(if (|\|\|| a b)
+	    (statements (funcall bal))))))
 
 
 #+nil
