@@ -40,7 +40,7 @@
 (defparameter *special-symbol*
   '(! &=  ++    ->      /=      <<=     >>    |\||
     !=  |(|     +=      ->*     |:|     <=      >>=     |\|=|
-    %   |)|     |,|     |.|     |::|    =       ?       ||||
+    %   |)|     |,|     |.|     |::|    =       ?       |\|\||
     %=  *       -       |.*|    |;|     ==      ^       }
     &   *=      --      |...|   <       >       ^=      ~
     &&  +       -=      /       <<      >=      {))
@@ -52,13 +52,26 @@
   '(* / % + - ^ & |\|| << >>))
 
 (defparameter *logical-operator-symbol*
-  '(== != < > <= >= && ||||))
+  '(== != < > <= >= && |\|\||))
 
 (defparameter *computed-assignment-operator-symbol*
   '(*= /= %= += -= ^= &= |\|=| <<= >>=))
 
 (defparameter *class-key*
   '(class struct union))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (bla #\0)					 ;;
+;; (bla 56)					 ;;
+;; (bla "a")					 ;;
+;; (type-of "a")				 ;;
+;; (defun bla (a)				 ;;
+;;  (typecase a					 ;;
+;;    (standard-char (format nil "'~a'" a))	 ;;
+;;    (number (format nil "'~a'" (code-char a))) ;;
+;;    (string (format nil "'~a'" (elt a 0)))))	 ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 #+nil
 (trace emit-cpp)
@@ -110,8 +123,10 @@
       (if (listp code)
        (case (car code)
 	 (:params (loop for e in (cadr code) collect
-		       (destructuring-bind (name &key type) e
-			 (format str "~a ~a" type name))))
+		       (destructuring-bind (name &key type default) e
+			 (if default
+			     (format str "~a ~a = ~a" type name (emit-cpp :code default))
+			     (format str "~a ~a" type name)))))
 	 (include (format str "#include ~s" (cadr code)))
 	 (compound-statement (with-output-to-string (s)
 			       (format s "{~%")
@@ -198,6 +213,16 @@
 				(if (listp e)
 				    (format nil "~a = ~a" (first e) (emit-cpp :code (second e)))
 				    (format nil "~a" e)))))))
+	 (enum-class (destructuring-bind ((name &key type) &rest rest) (cdr code)
+		 ;; C++11
+		 (with-output-to-string (s)
+		   (format s "enum class ~a ~a {~{ ~a~^,~}};~%"
+			   (if name name "")
+			   (if type (format nil ": ~a" type) "")
+			   (loop for e in rest collect
+				(if (listp e)
+				    (format nil "~a = ~a" (first e) (emit-cpp :code (second e)))
+				    (format nil "~a" e)))))))
 	 (new (format str "new ~a" (emit-cpp :code (cadr code))))
 	 (delete (format str "delete ~a" (emit-cpp :code (cadr code))))
 	 (delete[] (format str "delete [] ~a" (emit-cpp :code (cadr code))))
@@ -234,6 +259,19 @@
 			    (emit-cpp :code update-expression-opt)
 			    "")
 			(emit-cpp :code `(compound-statement ,@statement-list)))))
+
+	 (while (destructuring-bind (condition &rest statement-list)
+		  (cdr code)
+		(format str "while(~a) ~a"
+			(emit-cpp :code condition)
+			(emit-cpp :code `(compound-statement ,@statement-list)))))
+	 (do-while (destructuring-bind (condition &rest statement-list)
+		  (cdr code)
+		  (format str "do ~a while ( ~a )"
+			  (emit-cpp :code `(compound-statement ,@statement-list))
+			  (emit-cpp :code condition)
+			)))
+	 
 	 #-conly
 	 (for-range (destructuring-bind ((var-decl range) &rest statement-list)
 		  (cdr code)
@@ -283,7 +321,7 @@
 
 	 
 	 (dotimes (destructuring-bind ((var n) &rest body) (cdr code)
-		    (emit-cpp :code `(for ((,var 0 :type int) (< ,var ,(emit-cpp :code n)) (+= ,var 1))
+		    (emit-cpp :code `(for ((,var 0 :type "unsigned int") (< ,var ,(emit-cpp :code n)) (+= ,var 1))
 					  ,@body))))
 	 (if (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
 	       (with-output-to-string (s)
@@ -375,6 +413,12 @@
 		   (format str "(*(~a))" (emit-cpp :code object))))
 	 (hex (destructuring-bind (number) (cdr code)
 		(format str "0x~x" number)))
+	 (char (destructuring-bind (a) (cdr code)
+		 (typecase a
+		   (standard-char (format str "'~a'" a))
+		   (number (format str "'~a'" (code-char a)))
+		   (string (format str "'~a'" (elt a 0))))
+		 ))
 	 #+ispc (bit (destructuring-bind (number) (cdr code)
 		       (format str "0b~b" number)))
 	 (string (destructuring-bind (string) (cdr code)
@@ -392,10 +436,10 @@
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(= return funcall raw go break new delete delete[] ?)))
+					       '(= return funcall raw go break new delete delete[] ? do-while)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for-range for foreach foreach-unique foreach-tiled foreach-active dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand))
+		((member (second code) '(if for-range while for foreach foreach-unique foreach-tiled foreach-active dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
@@ -493,6 +537,17 @@
 	 (= hour h)
 	 (comma-list (<< cout (string "bla")) (= hour 0))
 	 ))))
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(function (blah ((a :type int :default 3)))
+	 (raw "// "))
+	)))
 ;;  http://stackoverflow.com/questions/16676821/c-multiple-statements-for-conditional-operator
 ;; ( h >= 0 && h < 24) ? ( hour = h) : (std::cout << "Invalid Hour Detected\n", hour = 0);
 #+nil
@@ -528,6 +583,16 @@
    `(with-compilation-unit
 	
 	(let (((aref buf (* width height)) :type "static int" :extra (raw " __attribute__((aligned(64)))")))))))
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(enum-class (ProtocolType) IP ICMP RAW)
+      (enum-class (fruit :type uint8_t) apple melon))))
 
 
 
@@ -539,7 +604,27 @@
    
    :code 
    `(with-compilation-unit
-	(lambda ()  ))))
+	(lambda (((i :type int)) :ret "->int")  ))))
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(while (< 1 a) (+= 1 a) (setf a b))
+      (do-while (< 1 a) (+= 1 a) (setf a b)))))
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code 
+   `(with-compilation-unit
+	(if (|\|\|| a b)
+	    (statements (funcall bal))))))
 
 
 #+nil
@@ -688,4 +773,18 @@
   (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
   )
 
+;; http://stackoverflow.com/questions/31394507/how-can-i-emulate-destructuring-in-c
+;; struct animal {
+;;     std::string species;
+;;     int weight;
+;;     std::string sound;
+;; };
 
+;; int main()
+;; {
+;;   auto pluto = animal { "dog", 23, "woof" };
+
+;;   auto [ species, weight, sound ] = pluto;
+
+;;   std::cout << "species=" << species << " weight=" << weight << " sound=" << sound << "\n";
+;; }
