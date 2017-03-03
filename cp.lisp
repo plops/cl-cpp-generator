@@ -31,6 +31,7 @@
   (:use :cl :cl-cpp-generator))
 (in-package :cl-cpp-generator)
 
+(push :ispc *features*) ;; for now i have to open cp.lisp and compile it again with C-c C-k, so that foreach works
 
 (setf (readtable-case *readtable*) :invert)
 
