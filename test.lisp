@@ -47,9 +47,9 @@
 	(clang-format (emit-cpp :str nil :code code) "/dev/shm/1")
 	(clang-format string "/dev/shm/2")
 	(assert (eq nil
-		   (with-output-to-string (s)
-		     (sb-ext:run-program "/usr/bin/diff" '("/dev/shm/1" "/dev/shm/2")
-					 :output s)))))))
+		    (with-output-to-string (s)
+		      (sb-ext:run-program "/usr/bin/diff" '("/dev/shm/1" "/dev/shm/2")
+					  :output s)))))))
 
 
 (progn	;; for loop
@@ -295,6 +295,36 @@ l = (1 + 2 + 3);
 }
 
   for(auto&& e : make_iterator_range(\".\",{})) {
+}
+"))
+
+
+(progn
+  (test 19 ;; new, delete[]
+	`(let ((buf :type "unsigned char*" :init (new (aref "unsigned char" size))))
+	   (delete[] buf))
+	"{
+  unsigned char* buf = new unsigned char[size];
+
+  delete [] buf;
+}
+")
+  (test 20 ;; new, delete
+	`(let ((buf :type "unsigned char*" :init (new "unsigned char")))
+	   (delete buf))
+	"{
+  unsigned char* buf = new unsigned char;
+
+  delete buf;
+}
+"))
+
+(progn
+  (test 21 ;; alignment on 64 byte boundary
+	`(let (((aref buf (* width height)) :type "static int" :extra (raw " __attribute__((aligned(64)))"))))
+	"{
+  static int buf[(width * height)] __attribute__((aligned(64)));
+
 }
 "))
 
