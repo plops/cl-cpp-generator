@@ -16,7 +16,7 @@
 		   (speed 0)
 		   (safety 3)
 		   (debug 3)))
-
+(push :ispc *features*) ;; for now i have to open cp.lisp and compile it again with C-c C-k, so that foreach works
 (compile-file "cp.lisp")
 (load "cp.fasl")
 
@@ -324,6 +324,108 @@ l = (1 + 2 + 3);
 	`(let (((aref buf (* width height)) :type "static int" :extra (raw " __attribute__((aligned(64)))"))))
 	"{
   static int buf[(width * height)] __attribute__((aligned(64)));
+
+}
+"))
+
+(progn
+  (test 22 ;; enum class
+	`(with-compilation-unit
+	     (enum-class (ProtocolType) IP ICMP RAW)
+	   (enum-class (fruit :type uint8_t) apple melon))
+	"enum class ProtocolType  { IP, ICMP, RAW};
+
+enum class fruit : uint8_t { apple, melon};
+"))
+
+(progn
+  (test 23 ;; lambda (c++)
+	`(lambda (((i :type int)) :ret "->int")  )
+	"[](int i)->int {
+}
+"))
+
+(progn
+  (test 24 ;; do-while while
+	`(statements
+	  (while (< 1 a) (+= 1 a) (setf a b))
+	  (do-while (< 1 a) (+= 1 a) (setf a b)))
+	"  while((1 < a)) {
+  1 += a;
+  a = b;
+}
+
+  do {
+  1 += a;
+  a = b;
+}
+ while ( (1 < a) );
+"))
+
+(progn
+  (test 25 ;; ||
+	`(if (|\|\|| a b)
+	    (statements (funcall bal)))
+	"if ( (a || b) ) {
+    bal();
+
+}
+"))
+
+(progn
+  (test 26 ;; ispc
+	`(with-compilation-unit
+	  (dotimes (i (funcall max 2 3))
+	    (funcall bla))
+	  (foreach (i (funcall max  1 0) (funcall min m n))
+		   (funcall ata))
+	  (foreach ((i (funcall max  1 0) (funcall min m n))
+		    (j 0 n))
+		   (funcall ata))
+	  (foreach-active (i)
+			  (+= (aref a index) (bit #b0110)))
+	  (function (func ((v :type "uniform int")) "extern void"))
+	  (foreach-unique (val x)
+			  (funcall func val))
+	  (let ((dx :type float :init (/ (- x1 x0) width))
+		(dy :type float :init (/ (- y1 y0) height))
+		)
+	    (foreach (i (funcall max  1 0) (funcall min m n))
+		     (funcall ata))
+	    #+nil (foreach (i 0 width)
+			   (let ((x :type float :init (+ x0 (* i dx)))
+				 (y :type float :init (+ y0 (* i dy)))
+				 (index :type int :init (+ i (* j width)))
+				 )
+			     (setf (aref output index) (funcall mandel x y #+nil max_iterations))))))
+	"for(unsigned int i = 0; (i < max(2,3)); i += 1) {
+  bla();
+}
+
+foreach(i = max(1,0) ... min(m,n)) {
+  ata();
+}
+
+foreach(i = max(1,0) ... min(m,n),j = 0 ... n) {
+  ata();
+}
+
+foreach_active(i) {
+  a[index] += 0b110;
+}
+
+extern void func(uniform int v);
+foreach_uniq(val in x) {
+  func(val);
+}
+
+{
+  float dx = ((x1 - x0) / width);
+float dy = ((y1 - y0) / height);
+
+  foreach(i = max(1,0) ... min(m,n)) {
+  ata();
+}
 
 }
 "))
