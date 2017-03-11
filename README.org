@@ -277,9 +277,58 @@ statement following that tag. A TAG must be an integer or a symbol. A
 STATEMENT must be a list. Other objects are illegal within the body.
 
 
+
+
+** Implementation of tests
+
+In order to verify that the code emitted by emit-cpp is valid I
+implemented unit tests in test.lisp. I also use sb-cover to create an
+HTML code coverage report.
+
+The function (test <number> <code> <string>) will emit C code as
+defined by the s-expression in <code> using the emit-cpp function into
+/dev/shm/1. 
+
+The expected output is given to the test function as the third
+parameter <string> and is written into /dev/shm/2.
+
+Both files are then indented with clang-format so that the test is
+less independent on the exact white space. Then the files are compared
+using the diff command.
+
+*** How to fix a broke test
+
+If the emit-cpp output is not the same as the expected <string>, an
+assertion error like this will show up:
+
+#+BEGIN_SRC
+The assertion
+(eq nil
+    #1=(with-output-to-string (s)
+         (sb-ext:run-program "/usr/bin/diff"
+                             '("/dev/shm/1" "/dev/shm/2")
+                             :output s)))
+failed with #1# = "2,5c2,5
+< float f = (3.2e-7);
+< double d = (7.2e-31);
+< complex float z = ((2.f+0) + (1.f+0i));
+< complex double w = ((2.e+0) + (1.e+0i));
+---
+> float f = (3.2000000000f-7);
+> double d = (7.200000000000000000e-31);
+> complex float z = ((2.0000000000f+0) + (1.0000000000f+0i));
+> complex double w = ((2.000000000000000000e+0) + (1.000000000000000000e+0i));
+".
+#+END_SRC
+
+In this case I modified the printing of floating point numbers in
+emit-cpp, so that the least amount of digits are printed without
+loosing precision. If the code in /dev/shm/1 is correct, just place it
+into the third argument <string> of test.
+
 ** Problem
 
-
+#+BEGIN_SRC
 (if (== current_pattern_number pattern_number) ...
 
 source/libview.cpp:265:41: warning: equality comparison with extraneous parentheses
@@ -295,6 +344,7 @@ source/libview.cpp:265:41: note: use '=' to turn this equality comparison into a
                                         ^~
                                         =
 
+#+END_SRC
 
 
 ** References
