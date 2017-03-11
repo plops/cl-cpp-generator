@@ -1,4 +1,15 @@
-;; http://www.sbcl.org/manual/ 16.3 sb-cover
+;; http://www.sbcl.org/manual/ 16.3 sb-cover. load this file with C-c
+;; C-l in slime if there are assert errors, the tests fail the section
+;; "How to fix a broke test" in README.org explains how the tests can
+;; be corrected.
+
+;; if all tests run successfull, you can see a code coverage report in
+;; coverage/*.html. This will tell which code lines were
+;; checked. Please note that highlighted green in this report not
+;; necessarily means that all cases are checked, e.g format calls with
+;; ~^ in the format string will need to be checked with different
+;; arguments. Any calls of member may also need many tests for full
+;; coverage.
 (require :sb-cover)
 
 (declaim (optimize sb-cover:store-coverage-data

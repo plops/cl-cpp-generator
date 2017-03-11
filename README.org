@@ -323,8 +323,9 @@ failed with #1# = "2,5c2,5
 
 In this case I modified the printing of floating point numbers in
 emit-cpp, so that the least amount of digits are printed without
-loosing precision. If the code in /dev/shm/1 is correct, just place it
-into the third argument <string> of test.
+loosing precision. Of course this broke the previous test. If the code
+in /dev/shm/1 is correct, just place it into the third argument
+<string> of test.
 
 ** Problem
 
