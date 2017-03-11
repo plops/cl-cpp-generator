@@ -263,6 +263,41 @@ l = (1 + 2 + 3);
 	"complex double ::blub g(char a, int *b) { add(a, b); }
 "))
 
+
+(progn ;; default parameter
+  (test 16 `(function (blah ((a :type int :default 3)))
+		      (raw "// "))
+	"blah(int a = 3){
+  // ;
+}
+"))
+
+(progn ;; terniary operator
+  (test 17
+   `(statements (? a b c)
+	       (? (<  a b) x)
+	       (? (&& (<= 0 h) (< h 24))
+		  (= hour h)
+		  (comma-list (<< cout (string "bla")) (= hour 0))
+		  ))
+   "( a ) ? ( b ): ( c );
+  ( (a < b) ) ? ( x );
+  ( ((0 <= h) && (h < 24)) ) ? ( hour = h ): ( (cout << \"bla\"),hour = 0 );
+"))
+
+
+(progn
+  (test 18 ;; for-range (c++)
+	`(statements
+	  (for-range (e (funcall make_iterator_range (string ".") (list ))))
+	  (for-range ((e :type "auto&&") (funcall make_iterator_range (string ".") (list )))))
+	"  for(auto e : make_iterator_range(\".\",{})) {
+}
+
+  for(auto&& e : make_iterator_range(\".\",{})) {
+}
+"))
+
 #+nil
 (emit-cpp :str nil :code  '(with-compilation-unit
 	 (include <stdio.h>)
