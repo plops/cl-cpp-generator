@@ -86,7 +86,10 @@
 	 (s (format nil "~E" ff)))
    (assert (= 0s0 (- ff
 		     (read-from-string s))))
-   (substitute #\e #\f s)))
+   (format nil "~af" s)))
+
+#+nil
+(print-sufficient-digits-f32 1s0)
 
 (defun print-sufficient-digits-f64 (f)
   "print a double floating point number as a string with a given nr. of
@@ -94,9 +97,12 @@
   pattern."
   (let* ((ff (coerce f 'double-float))
 	 (s (format nil "~E" ff)))
-   (assert (= 0s0 (- ff
+   (assert (= 0d0 (- ff
 		     (read-from-string s))))
-   (substitute #\e #\d s)))
+   s))
+
+#+nil
+(print-sufficient-digits-f64 1d0)
 
 (defun get-all-macros (&optional package)
   (let ((lst ())
