@@ -510,15 +510,13 @@
 		    ((complexp code)
 		     (typecase (realpart code)
 		       (single-float
-			(substitute #\f #\e
-				       (format str "((~a) + (~ai))"
-					       (print-sufficient-digits-f32 (realpart code))
-					       (print-sufficient-digits-f32 (imagpart code)))))
+			(format str "((~a) + (~ai))"
+				(print-sufficient-digits-f32 (realpart code))
+				(print-sufficient-digits-f32 (imagpart code))))
 		       (double-float
-			(substitute #\e #\d
-				    (format nil "((~a) + (~ai))"
-					    (print-sufficient-digits-f64 (realpart code))
-					    (print-sufficient-digits-f64 (imagpart code)))))))))
+			(format nil "((~a) + (~ai))"
+				(print-sufficient-digits-f64 (realpart code))
+				(print-sufficient-digits-f64 (imagpart code))))))))
 	 ))
       ""))
 

@@ -122,9 +122,9 @@ l = (1 + 2 + 3);
 		(z :type "complex float" :init #.(complex 2s0 1s0))
 		(w :type "complex double" :init #.(complex 2d0 1d0))))
 	"int i = 0;
-float f = (3.2e-7);
+float f = (3.2e-7f);
 double d = (7.2e-31);
-complex float z = ((2.f+0) + (1.f+0i));
+complex float z = ((2.e+0f) + (1.e+0fi));
 complex double w = ((2.e+0) + (1.e+0i));
 "))
 
@@ -138,9 +138,9 @@ complex double w = ((2.e+0) + (1.e+0i));
 	  (+= j (+ 32 q)))
 	"{
   int i = 0;
-float f = (3.2e-7);
+float f = (3.2e-7f);
 double d = (7.2e-31);
-complex float z = ((2.f+0) + (1.f+0i));
+complex float z = ((2.e+0f) + (1.e+0fi));
 complex double w = ((2.e+0) + (1.e+0i));
 
   i = (f + d);j = (3 - j);
