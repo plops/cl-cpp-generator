@@ -99,7 +99,7 @@
 	 (s (format nil "~E" ff)))
    (assert (= 0d0 (- ff
 		     (read-from-string s))))
-   s))
+   (substitute #\e #\d s)))
 
 #+nil
 (print-sufficient-digits-f64 1d0)
