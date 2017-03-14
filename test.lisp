@@ -430,6 +430,20 @@ float dy = ((y1 - y0) / height);
 }
 "))
 
+(progn
+  (test 27 ;; default member https://jeffamstutz.io/2017/03/04/what-features-i-like-the-most-in-c11-part-2/
+	`(class MyClassType ()
+		(access-specifier private)
+		(decl ((privateInt :type int :extra "{ 1 }"))))
+	
+	"class MyClassType {
+private:
+
+int privateInt{ 1 };
+
+};
+"))
+
 #+nil
 (emit-cpp :str nil :code  '(with-compilation-unit
 	 (include <stdio.h>)
