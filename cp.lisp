@@ -632,6 +632,19 @@
 	(if (|\|\|| a b)
 	    (statements (funcall bal))))))
 
+#+nil
+(with-output-to-string (s)
+  (emit-cpp
+   :str s
+   :clear-env t
+   
+   :code  ;; test struct inside statement
+   `(with-compilation-unit
+	(function (bla () void)
+	 (struct b ()
+		 (decl ((q :type int)
+			(w :type float))))))))
+
 
 #+nil
 (with-output-to-string (s)
