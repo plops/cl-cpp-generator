@@ -356,7 +356,24 @@ source/libview.cpp:265:41: note: use '=' to turn this equality comparison into a
 
 - http://voodoo-slide.blogspot.de/2010/01/amplifying-c.html
 
-- https://github.com/burtonsamograd/sxc
+- https://github.com/burtonsamograd/sxc (CL)
+
+the syntax is structured in a way that, though it resembles C, so that
+  it is quickly readable if you know C, seems to be hard to analyze
+  for rudimentary structure in a way that follows semantics.
+
+[he] wrote the syntax as [he] went along going through the examples and
+problems of K&R. The syntax is more like C as this is more of a tool
+that is meant to bring C programmers into the Lisp world rather than
+pulling Lisp programmers into the C world
+
+The expander of a macro is Lisp; its output is SXC.
+
+- https://bitbucket.org/ktg/l (Racket)
+
+- http://super.para.media.kyoto-u.ac.jp/~tasuku/sc/index.html (CL)
+https://bitbucket.org/tasuku/sc-tascell
+http://super.para.media.kyoto-u.ac.jp/%7Etasuku/sc/pub/ppopp09.pdf
 
 - https://github.com/shirok/Gauche/blob/master/lib/gauche/cgen/cise.scm
 
@@ -368,7 +385,10 @@ source/libview.cpp:265:41: note: use '=' to turn this equality comparison into a
   
 - https://github.com/cbaggers/varjo
   
+- https://github.com/takagi/cl-cuda
+
 - https://software.intel.com/en-us/articles/the-ultimate-question-of-programming-refactoring-and-everything
 
 - clang tooling https://clang.llvm.org/docs/LibASTMatchersTutorial.html
+  
   
