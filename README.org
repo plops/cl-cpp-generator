@@ -411,6 +411,8 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
   
 - https://github.com/takagi/cl-cuda
 
+- https://github.com/vsedach/Parenscript
+
 - https://software.intel.com/en-us/articles/the-ultimate-question-of-programming-refactoring-and-everything
 
 - clang tooling https://clang.llvm.org/docs/LibASTMatchersTutorial.html
