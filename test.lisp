@@ -444,6 +444,25 @@ int privateInt{ 1 };
 };
 "))
 
+(progn
+  (test 28 ;; struct inside of function
+	`(function (bla () void)
+	 (struct b ()
+		 (decl ((q :type int)
+			(w :type float)))))
+	
+	"void bla(){
+  struct b {
+int q;
+float w;
+
+};
+
+}
+"))
+
+
+
 #+nil
 (emit-cpp :str nil :code  '(with-compilation-unit
 	 (include <stdio.h>)

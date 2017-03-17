@@ -348,16 +348,41 @@ source/libview.cpp:265:41: note: use '=' to turn this equality comparison into a
 #+END_SRC
 
 
+** Ideas
+
+*** Destructuring
+
+- http://stackoverflow.com/questions/31394507/how-can-i-emulate-destructuring-in-c
+
+#+BEGIN_SRC
+ struct animal {
+     std::string species;
+     int weight;
+     std::string sound;
+ };
+
+ int main()
+ {
+   auto pluto = animal { "dog", 23, "woof" };
+
+   auto [ species, weight, sound ] = pluto;
+
+   std::cout << "species=" << species << " weight=" << weight << " sound=" << sound << "\n";
+ }
+#+END_SRC
+
 ** References
 
 
 
 - how to write a dsl in lisp: https://www.youtube.com/watch?v=5FlHq_iiDW0
 
-- http://voodoo-slide.blogspot.de/2010/01/amplifying-c.html
+- https://github.com/deplinenoise/c-amplify (CL)
+http://voodoo-slide.blogspot.de/2010/01/amplifying-c.html
+
 
 - https://github.com/burtonsamograd/sxc (CL)
-
+ https://news.ycombinator.com/item?id=13199610
 the syntax is structured in a way that, though it resembles C, so that
   it is quickly readable if you know C, seems to be hard to analyze
   for rudimentary structure in a way that follows semantics.
@@ -376,8 +401,6 @@ https://bitbucket.org/tasuku/sc-tascell
 http://super.para.media.kyoto-u.ac.jp/%7Etasuku/sc/pub/ppopp09.pdf
 
 - https://github.com/shirok/Gauche/blob/master/lib/gauche/cgen/cise.scm
-
-- https://news.ycombinator.com/item?id=13199610
 
 - https://github.com/kiselgra/c-mera
 

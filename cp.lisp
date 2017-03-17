@@ -27,13 +27,9 @@
    #:lisp
    #:statement))
 
-(push :ispc *features*) ;; for now i have to open cp.lisp and compile it again with C-c C-k, so that foreach works
-
 (defpackage :cl-cpp-generator-macros
   (:use :cl :cl-cpp-generator))
 (in-package :cl-cpp-generator)
-
-
 
 (setf (readtable-case *readtable*) :invert)
 
@@ -62,22 +58,6 @@
 (defparameter *class-key*
   '(class struct union))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (bla #\0)					 ;;
-;; (bla 56)					 ;;
-;; (bla "a")					 ;;
-;; (type-of "a")				 ;;
-;; (defun bla (a)				 ;;
-;;  (typecase a					 ;;
-;;    (standard-char (format nil "'~a'" a))	 ;;
-;;    (number (format nil "'~a'" (code-char a))) ;;
-;;    (string (format nil "'~a'" (elt a 0)))))	 ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-#+nil
-(trace emit-cpp)
-
 (defun print-sufficient-digits-f32 (f)
   "print a single floating point number as a string with a given nr. of
   digits. parse it again and increase nr. of digits until the same bit
@@ -103,23 +83,6 @@
 
 #+nil
 (print-sufficient-digits-f64 1d0)
-
-(defun get-all-macros (&optional package)
-  (let ((lst ())
-        (package (find-package package)))
-    (do-all-symbols (s lst)
-      (when (fboundp s)
-	(when (macro-function s)
-	 (if package
-	     (when (eql (symbol-package s) package)
-	      
-	       (push s lst))
-	     (push s lst)))))
-    lst))
-
-#+nil
-(get-all-macros 'cl-cpp-generator)
-
 
 (defparameter *env-functions* nil)
 (defparameter *env-macros* nil)
@@ -491,9 +454,6 @@
 			    (emit-cpp :code left)
 			    op
 			    (emit-cpp :code right))))
-		  #+nil ((member (car code) (get-all-macros 'cl-cpp-generator-macros))
-			 ;; if it is a macro in the cl-cpp-generator package, then expand it
-			 (emit-cpp :code `(macroexpand ,@code)))
 		  (t (format nil "not processable: ~a" code)))))
        (cond
 	 ((or (symbolp code)
@@ -521,173 +481,6 @@
       ""))
 
 
-
-#+nil
-(defmacro with-c-file ((f fn) &body body)
-  `(let ((,f :type FILE :init (funcall fopen ,fn)
-	   ))
-     ,@body))
-
-;; for (auto&& entry : boost::make_iterator_range (fs::directory_iterator ("."), {})) { ;;
-#+nil
-(with-output-to-string (s)
-  (emit-cpp
-   :str s
-   :clear-env t
-   
-   :code 
-   `(with-compilation-unit
-	(statements (? a b c))
-      (? (<  a b) x)
-      (? (&& (<= 0 h) (< h 24))
-	 (= hour h)
-	 (comma-list (<< cout (string "bla")) (= hour 0))
-	 ))))
-#+nil
-(with-output-to-string (s)
-  (emit-cpp
-   :str s
-   :clear-env t
-   
-   :code 
-   `(with-compilation-unit
-	(function (blah ((a :type int :default 3)))
-	 (raw "// "))
-	)))
-;;  http://stackoverflow.com/questions/16676821/c-multiple-statements-for-conditional-operator
-;; ( h >= 0 && h < 24) ? ( hour = h) : (std::cout << "Invalid Hour Detected\n", hour = 0);
-#+nil
-(with-output-to-string (s)
-  (emit-cpp
-   :str s
-   :clear-env t
-   
-   :code 
-   `(with-compilation-unit
-	(for-range (e (funcall make_iterator_range (string ".") (list ))))
-      (for-range ((e :type "auto&&") (funcall make_iterator_range (string ".") (list )))))))
-
-#+nil
-(with-output-to-string (s)
-  (emit-cpp
-   :str s
-   :clear-env t
-   
-   :code 
-   `(with-compilation-unit
-	
-	(let ((buf :type "unsigned char*" :init (new (aref "unsigned char" size))))
-	  (delete[] buf)))))
-
-#+nil
-(with-output-to-string (s)
-  (emit-cpp
-   :str s
-   :clear-env t
-   
-   :code 
-   `(with-compilation-unit
-	
-	(let (((aref buf (* width height)) :type "static int" :extra (raw " __attribute__((aligned(64)))")))))))
-#+nil
-(with-output-to-string (s)
-  (emit-cpp
-   :str s
-   :clear-env t
-   
-   :code 
-   `(with-compilation-unit
-	(enum-class (ProtocolType) IP ICMP RAW)
-      (enum-class (fruit :type uint8_t) apple melon))))
-
-
-
-#+nil
-(with-output-to-string (s)
-  (emit-cpp
-   :str s
-   :clear-env t
-   
-   :code 
-   `(with-compilation-unit
-	(lambda (((i :type int)) :ret "->int")  ))))
-#+nil
-(with-output-to-string (s)
-  (emit-cpp
-   :str s
-   :clear-env t
-   
-   :code 
-   `(with-compilation-unit
-	(while (< 1 a) (+= 1 a) (setf a b))
-      (do-while (< 1 a) (+= 1 a) (setf a b)))))
-#+nil
-(with-output-to-string (s)
-  (emit-cpp
-   :str s
-   :clear-env t
-   
-   :code 
-   `(with-compilation-unit
-	(if (|\|\|| a b)
-	    (statements (funcall bal))))))
-
-#+nil
-(with-output-to-string (s)
-  (emit-cpp
-   :str s
-   :clear-env t
-   
-   :code  ;; test struct inside statement
-   `(with-compilation-unit
-	(function (bla () void)
-	 (struct b ()
-		 (decl ((q :type int)
-			(w :type float))))))))
-
-
-#+nil
-(with-output-to-string (s)
-  (emit-cpp
-   :str s
-   :clear-env t
-   
-   :code 
-   `(with-compilation-unit
-	(dotimes (i (funcall max 2 3))
-	  (funcall bla))
-      (foreach (i (funcall max  1 0) (funcall min m n))
-	       (funcall ata))
-      (foreach ((i (funcall max  1 0) (funcall min m n))
-		(j 0 n))
-	       (funcall ata))
-      (foreach-active (i)
-		      (+= (aref a index) (bit #b0110)))
-      (function (func ((v :type "uniform int")) "extern void"))
-      (foreach-unique (val x)
-		      (funcall func val))
-      (let ((dx :type float :init (/ (- x1 x0) width))
-			 (dy :type float :init (/ (- y1 y0) height))
-			 )
-		     (foreach (i (funcall max  1 0) (funcall min m n))
-			      (funcall ata))
-		     #+nil (foreach (i 0 width)
-			      (let ((x :type float :init (+ x0 (* i dx)))
-				    (y :type float :init (+ y0 (* i dy)))
-				    (index :type int :init (+ i (* j width)))
-				    )
-				(setf (aref output index) (funcall mandel x y #+nil max_iterations))))))))
-
-#+nil
-(with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
-		   :direction :output :if-exists :supersede :if-does-not-exist :create)
-  (emit-cpp :str s :code
-	      '(with-compilation-unit
-		(for ((i a :type int) (< i n) (+= i 1))
-		 (+= b q))
-		
-		)))
-
 (defun compile-cpp (fn code &key options)
   (let ((source-fn (concatenate 'string fn ".cpp"))
 	(bin-fn (concatenate 'string fn ".bin")))
@@ -703,107 +496,3 @@
 ;   (sb-ext:run-program "/usr/bin/objdump" `("-DS" ,bin-fn))
    ))
 
-
-;; interrupt routine doesn't have to save registers if no other functions are called
-;; integer divide, modulus, multiply, bitwise and, or, xor and compare are not implemented in hardware
-;; --ram-model loader doesn't need .cinit sectionx
-
-#+nil
-(emit-cpp :code '(with-compilation-unit (dotimes (i 12)
-					  (if (== i 3)
-					      (statements
-					       (funcall (ns std (ns b b)) i)
-					       (funcall (arrow  (ns a b c) c) i))
-					      (statements
-					       (funcall (ref b) i)
-					       (funcall (dot (aref c 3) (deref a) c) i))))))
-
-#+nil
-(progn
-  (with-open-file (s "/home/martin/stage/cl-cpp-generator/o.cpp"
-		     :direction :output :if-exists :supersede :if-does-not-exist :create)
-    (emit-cpp :str s :code
-	      '(with-compilation-unit
-		(include <stdio.h>)
-		(include "bla.h")
-		(enum fsm (powerOff 1) (normal) (error (+ normal 3))) 
-		(extern-c
-		 (decl (((aref sdata 12) :type "extern Uint16")
-			((aref rdata (+ 2 3)) :type "extern Uint16")
-			((aref tdata) :type "extern Uint16" :init (list 3 1 4 1 5)))))
-		(with-namespace N
-		   (class "gug::senso" ()
-		   (access-specifier public)
-		    (function (f ((a :type int)) int))
-		    (function (h ((a :type int)) int))
-		   (access-specifier private)
-		    (function ("senso" ((a :type int))))
-		    (function (h2 ((a :type int)) int)))
-		  (class sensor ("public p::pipeline"
-				 "virtual public qqw::q"
-				 "virtual public qq::q"))
-		  
-		  (decl ((i :type int :init 0)
-			 (f :type float :init 3.2s-7)
-			 (d :type double :init 7.2d-31)
-			 (z :type "complex float" :init #.(complex 2s0 1s0))
-			 (w :type "complex double" :init #.(complex 2d0 1d0))))
-		  (union "lag::sensor2" ("private p::pipeline2"))
-		  (let ((i :type int :init 0)
-			(f :type float :init 3.2s-7)
-			(d :type double :init 7.2d-31)
-			(z :type "complex float" :init #.(complex 2s0 1s0))
-			(w :type "complex double" :init #.(complex 2d0 1d0)))
-		    (setf i (+ f d)))
-		  (function (g ((a :type char)
-				(b :type int*)) "complex double::blub")
-		   (compound-statement
-		    (setf  q (+ 1 2 3)
-			   l (+ 1 2 3))
-		     (compound-statement
-			 (if (== a b)
-			     (+ a b)
-			     (- a b))
-		       (if (< b q)
-			   (*= b q))))
-		   (setf b (* (/ 3 (+ 32 3)) 2 3 (+ 2 (/ 13 (+ 2 39)))))
-		   (for ((i a :type int) (< i n) (+= i 1))
-			(+= b q))
-		   (for (() (< i n) (+= i 1))
-			(+= b q)))
-		  (function (bla ((a :type char)
-				  (b :type int*)) ()
-				  :ctor
-				  ((a 3)
-				   (sendToSensorCb sendToSensorCb_)))
-		   (tagbody
-		    start
-		      (if (== a b)
-			  (go start)
-			  (go next))
-		    next
-		      (case q
-			(3 (+= q 3))
-			(4 (+= q 4)
-			   (/= p 2))
-			(t (/= p 1))))
-		   )
-		  ))))
-  (sb-ext:run-program "/usr/bin/clang-format" '("-i" "/home/martin/stage/cl-cpp-generator/o.cpp"))
-  )
-
-;; http://stackoverflow.com/questions/31394507/how-can-i-emulate-destructuring-in-c
-;; struct animal {
-;;     std::string species;
-;;     int weight;
-;;     std::string sound;
-;; };
-
-;; int main()
-;; {
-;;   auto pluto = animal { "dog", 23, "woof" };
-
-;;   auto [ species, weight, sound ] = pluto;
-
-;;   std::cout << "species=" << species << " weight=" << weight << " sound=" << sound << "\n";
-;; }
