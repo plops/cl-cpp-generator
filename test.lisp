@@ -484,6 +484,8 @@ float w;
 }
 "))
 
+;;(sb-introspect:who-calls )
+
 (progn
   
   (macrolet ((with-fopen ((handle fn) &body body)

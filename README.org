@@ -38,6 +38,7 @@ I don't think this is required if you start a new instance of Common
 Lisp. In that case quicklisp will find the new folder during its
 initialization.
 
+I develop with SBCL, so for now that is the only supported implementation.
 
 Place the following code into a .lisp file and execute the file, i.e. in Slime press C-c C-k.
 
