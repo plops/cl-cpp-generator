@@ -68,7 +68,9 @@ with-open-file with C-M-x.
 
 ** Using macros
 
-This an example to that defines and uses a macro:
+This an example to that defines and uses a macro. emit-cpp calls the
+macroexpand of the host compiler. That is why either defmacro or
+macrolet can be used to define the macro.
 
 #+BEGIN_SRC common-lisp
 (eval-when (:compile-toplevel :execute :load-toplevel)
