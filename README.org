@@ -410,13 +410,13 @@ pulling Lisp programmers into the C world
 
 The expander of a macro is Lisp; its output is SXC.
 
-- https://bitbucket.org/ktg/l (Racket)
+
 
 - http://super.para.media.kyoto-u.ac.jp/~tasuku/sc/index.html (CL)
 https://bitbucket.org/tasuku/sc-tascell
 http://super.para.media.kyoto-u.ac.jp/%7Etasuku/sc/pub/ppopp09.pdf
 
-- https://github.com/shirok/Gauche/blob/master/lib/gauche/cgen/cise.scm
+
 
 - https://github.com/kiselgra/c-mera
 
@@ -427,10 +427,15 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
   
 - https://github.com/takagi/cl-cuda
 
+
+
+  
+- https://bitbucket.org/ktg/l (Racket, very concise/nice documentation)  
+
+- https://github.com/shirok/Gauche/blob/master/lib/gauche/cgen/cise.scm
+
 - https://github.com/vsedach/Parenscript
 
 - https://software.intel.com/en-us/articles/the-ultimate-question-of-programming-refactoring-and-everything
 
 - clang tooling https://clang.llvm.org/docs/LibASTMatchersTutorial.html
-  
-  
