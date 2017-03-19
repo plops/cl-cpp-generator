@@ -66,9 +66,6 @@ emitted_code.cpp.  To write more you can add additional code in in the
 with-compilation-unit expression and re-execute the surrounding
 with-open-file with C-M-x.
 
-** Syntax
-
-`(include "file1.h" ...)` => `#include "file1.h" ...`
 
 ** Using macros
 
