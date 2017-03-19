@@ -484,6 +484,30 @@ float w;
 }
 "))
 
+(progn
+  
+  (macrolet ((with-fopen ((handle fn) &body body)
+	       `(let ((,handle :type FILE* :init (funcall fopen ,fn (string "wb"))))
+		  ,@body
+		  (funcall fclose ,handle))))
+    (test 30 ;; macrolet
+	  `(function (frame_store ((frame_data :type "char*")
+				  (frame_length :type int)
+				   (filename :type "const char*")) void)
+		     (macroexpand (with-fopen (o filename)
+				   (funcall fwrite frame_data frame_length 1 o))))
+	
+	 "void frame_store(char* frame_data,int frame_length,const char* filename){
+  {
+  FILE* o = fopen(filename,\"wb\");
+
+  fwrite(frame_data,frame_length,1,o);
+  fclose(o);
+}
+
+}
+")))
+
 
 
  
