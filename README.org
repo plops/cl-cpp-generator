@@ -38,6 +38,7 @@ I don't think this is required if you start a new instance of Common
 Lisp. In that case quicklisp will find the new folder during its
 initialization.
 
+I develop with SBCL, so for now that is the only supported implementation.
 
 Place the following code into a .lisp file and execute the file, i.e. in Slime press C-c C-k.
 
@@ -65,9 +66,12 @@ emitted_code.cpp.  To write more you can add additional code in in the
 with-compilation-unit expression and re-execute the surrounding
 with-open-file with C-M-x.
 
+
 ** Using macros
 
-This an example to that defines and uses a macro:
+This an example to that defines and uses a macro. emit-cpp calls the
+macroexpand of the host compiler. That is why either defmacro or
+macrolet can be used to define the macro.
 
 #+BEGIN_SRC common-lisp
 (eval-when (:compile-toplevel :execute :load-toplevel)
@@ -407,13 +411,13 @@ pulling Lisp programmers into the C world
 
 The expander of a macro is Lisp; its output is SXC.
 
-- https://bitbucket.org/ktg/l (Racket)
+
 
 - http://super.para.media.kyoto-u.ac.jp/~tasuku/sc/index.html (CL)
 https://bitbucket.org/tasuku/sc-tascell
 http://super.para.media.kyoto-u.ac.jp/%7Etasuku/sc/pub/ppopp09.pdf
 
-- https://github.com/shirok/Gauche/blob/master/lib/gauche/cgen/cise.scm
+
 
 - https://github.com/kiselgra/c-mera
 
@@ -424,10 +428,15 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
   
 - https://github.com/takagi/cl-cuda
 
+
+
+  
+- https://bitbucket.org/ktg/l (Racket, very concise/nice documentation)  
+
+- https://github.com/shirok/Gauche/blob/master/lib/gauche/cgen/cise.scm
+
 - https://github.com/vsedach/Parenscript
 
 - https://software.intel.com/en-us/articles/the-ultimate-question-of-programming-refactoring-and-everything
 
 - clang tooling https://clang.llvm.org/docs/LibASTMatchersTutorial.html
-  
-  
