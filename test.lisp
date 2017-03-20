@@ -461,6 +461,11 @@ float w;
 }
 "))
 
+(progn
+  (test 29 ;; operator
+	`(function (operator= ((a :type "const Array<T>&")) Array<T>&))
+	"Array<T>& operator=(const Array<T>& a);"))
+
 
 
 #+nil
