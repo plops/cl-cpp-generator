@@ -428,7 +428,7 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
   
 - https://github.com/takagi/cl-cuda
 
-
+- https://github.com/angavrilov/cl-gpu
 
   
 - https://bitbucket.org/ktg/l (Racket, very concise/nice documentation)  
