@@ -10,6 +10,10 @@
 ;; ~^ in the format string will need to be checked with different
 ;; arguments. Any calls of member may also need many tests for full
 ;; coverage.
+
+;; Note: You can use C-u C-M-x to execute individual test forms and
+;; print the output in the current buffer.
+
 (require :sb-cover)
 
 (declaim (optimize sb-cover:store-coverage-data
