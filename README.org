@@ -441,4 +441,6 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
 
 - clang tooling https://clang.llvm.org/docs/LibASTMatchersTutorial.html
 
-- Rust/Haskell Microcontroller https://news.ycombinator.com/item?id=14071282
+- Rust/Haskell/Ada Microcontroller https://news.ycombinator.com/item?id=14071282
+
+- Haskel DSL http://ivorylang.org/
