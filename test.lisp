@@ -20,9 +20,9 @@
 		   (speed 0)
 		   (safety 3)
 		   (debug 3)))
-(push :ispc *features*) ;; for now i have to open cp.lisp and compile it again with C-c C-k, so that foreach works
-(compile-file "cp.lisp")
-(load "cp.fasl")
+#+nil(push :ispc *features*) ;; for now i have to open cp.lisp and compile it again with C-c C-k, so that foreach works
+#+nil(compile-file "cp.lisp")
+#+nil(load "cp.fasl")
 
 (in-package :cl-cpp-generator)
 
@@ -519,6 +519,23 @@ float w;
 }
 ")))
 
+
+(test 31 ;; constructor inheritance
+	  `(function (CustomRectItem ((x :type qreal)
+					   (y :type qreal)
+					   (w :type qreal)
+					   (h :type qreal)
+					   (parent :type QGraphicsItem* :default nullptr))
+					  explicit
+					  :parent-ctor
+					  ((QGraphicsRectItem x y w h parent)))
+			  (raw "//"))
+	
+	 "explicit CustomRectItem(qreal x,qreal y,qreal w,qreal h,QGraphicsItem* parent = nullptr):QGraphicsRectItem(x,y,w,h,parent)
+{
+  //;
+}
+")
 
 
  
