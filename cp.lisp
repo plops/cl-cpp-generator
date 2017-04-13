@@ -147,7 +147,7 @@
 				(emit-cpp :code (macroexpand-1 macro)
 						   
 						   ))))
-	 (function (destructuring-bind ((name params &optional ret &key ctor specifier) &rest function-body) (cdr code)
+	 (function (destructuring-bind ((name params &optional ret &key ctor specifier parent-ctor) &rest function-body) (cdr code)
 		     (let ((header (concatenate 'string
 						(when ret (format nil "~a " ret))
 						(format nil "~a(~{~a~^,~})"
@@ -155,10 +155,16 @@
 							(emit-cpp :code `(:params ,params)))
 						(when specifier
 						  (format nil " ~a" specifier))
-						(when ctor
+						(when (or ctor parent-ctor)
 						  (format nil ":~{~a~^,~}~%"
-							  (loop for (e f) in ctor collect
-							       (format nil " ~a( ~a )" e f)))))))
+							  (append
+							   (loop for (e f) in ctor collect
+								(format nil " ~a( ~a )" e f))
+							   (loop for e  in parent-ctor collect 
+								(destructuring-bind (name &rest params) e
+								  (format nil "~a"
+									  (emit-cpp :code `(with-compilation-unit
+											       (funcall ,name ,@params))))))))))))
 		       (if function-body
 			   (progn
 			     (push (list :name name
