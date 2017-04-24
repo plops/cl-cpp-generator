@@ -106,7 +106,8 @@
 
 (defparameter *env-functions* nil)
 (defparameter *env-macros* nil)
-(defun emit-cpp (&key code (str nil) (clear-env nil))
+
+(defun emit-cpp (&key code (str nil) (clear-env nil) )
   (when clear-env
     (setf *env-functions* nil
 	  *env-macros* nil))
@@ -165,13 +166,14 @@
 								  (format nil "~a"
 									  (emit-cpp :code `(with-compilation-unit
 											       (funcall ,name ,@params))))))))))))
-		       (if function-body
+		       (if function-body 
 			   (progn
 			     (push (list :name name
 					 :params params
 					 :ret ret
 					 :ctor ctor
 					 :specifier specifier
+					 :parent-ctor parent-ctor
 					 :body function-body)
 				   *env-functions*)
 			     (concatenate 'string
