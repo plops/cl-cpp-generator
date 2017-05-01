@@ -281,7 +281,8 @@
 			      (format nil "~a ~a" type name)))
 			(emit-cpp :code range)
 			(emit-cpp :code `(compound-statement ,@statement-list)))))
-	 #+ispc (foreach (destructuring-bind (head &rest body) (cdr code) 
+	 ;#+ispc
+	 (foreach (destructuring-bind (head &rest body) (cdr code) 
 			   (if (listp (car head))
 			       (progn  ;; foreach (i = 0 ... width, j = 1 .. height) {
 				 (format str "foreach(~{~a~^,~}) ~a"
@@ -294,7 +295,8 @@
 				(format str "foreach(~a = ~a ... ~a) ~a"
 					var (emit-cpp :code start) (emit-cpp :code n)
 					(emit-cpp :code `(compound-statement ,@body)))))))
-	 #+ispc (foreach-tiled (destructuring-bind (head &rest body) (cdr code)  ;; same semantics as foreach
+	 ;#+ispc
+	 (foreach-tiled (destructuring-bind (head &rest body) (cdr code)  ;; same semantics as foreach
 			   (if (listp (car head))
 			       (progn  ;; foreach_tiled (i = 0 ... width, j = 1 .. height) {
 				 (format str "foreach_tiled(~{~a~^,~}) ~a"
@@ -307,12 +309,14 @@
 				(format str "foreach_tiled(~a = ~a ... ~a) ~a"
 					var (emit-cpp :code start) (emit-cpp :code n)
 					(emit-cpp :code `(compound-statement ,@body)))))))
-	 #+ispc (foreach-active (destructuring-bind ((var) &rest body) (cdr code) ;; foreach_active (i) {
+	 ;#+ispc
+	 (foreach-active (destructuring-bind ((var) &rest body) (cdr code) ;; foreach_active (i) {
 				  (format str "foreach_active(~a) ~a"
 				   var
 				   (emit-cpp :code `(compound-statement ,@body)))))
 
-	 #+ispc (foreach-unique (destructuring-bind ((var seq) &rest body) (cdr code) ;; foreach_unique (val in x) {			  
+	 ;#+ispc
+	 (foreach-unique (destructuring-bind ((var seq) &rest body) (cdr code) ;; foreach_unique (val in x) {			  
 				  (format str "foreach_uniq(~a in ~a) ~a"
 					  var
 					  (emit-cpp :code seq)
@@ -338,7 +342,8 @@
 		 (when false-statement
 		  (format s ": ( ~a )"
 			  (emit-cpp :code false-statement))))))
-	 #+ispc (cif (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
+	 ;#+ispc
+	 (cif (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
 	       (with-output-to-string (s)
 		 (format s "if ( ~a ) ~a"
 			 (emit-cpp :code condition)
@@ -367,9 +372,13 @@
 			       (emit-cpp :code `(statement = ,(elt args i) ,(elt args (1+ i))))))
 		  (if (< 2 (length args))
 		      (format s "~%")))))
-	 (aref (destructuring-bind (name &optional n) (cdr code)
+	 #+nil (aref (destructuring-bind (name &optional n) (cdr code)
 		 (if n
 		     (format str "~a[~a]" name (emit-cpp :code n))
+		     (format str "~a[]" name))))
+	 (aref (destructuring-bind (name &rest rest) (cdr code)
+		 (if rest
+		     (format str "~a~{[~a]~}" name (mapcar #'(lambda (x) (emit-cpp :code x)) rest))
 		     (format str "~a[]" name))))
 	 (return (format str "return ~a"
 			 (emit-cpp :code (second code))))
@@ -418,7 +427,8 @@
 		   (number (format str "'~a'" (code-char a)))
 		   (string (format str "'~a'" (elt a 0))))
 		 ))
-	 #+ispc (bit (destructuring-bind (number) (cdr code)
+	 ;#+ispc
+	 (bit (destructuring-bind (number) (cdr code)
 		       (format str "0b~b" number)))
 	 (string (destructuring-bind (string) (cdr code)
 		   (format str "\"~a\"" string)))

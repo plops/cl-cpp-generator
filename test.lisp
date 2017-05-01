@@ -20,7 +20,7 @@
 		   (speed 0)
 		   (safety 3)
 		   (debug 3)))
-#+nil(push :ispc *features*) ;; for now i have to open cp.lisp and compile it again with C-c C-k, so that foreach works
+#+nil (push :ispc *features*) ;; for now i have to open cp.lisp and compile it again with C-c C-k, so that foreach works
 #+nil(compile-file "cp.lisp")
 #+nil(load "cp.fasl")
 
@@ -536,6 +536,19 @@ float w;
   //;
 }
 ")
+
+
+(test 32 ;; multi dimensonal array
+      `(with-compilation-unit
+	   (aref buf)
+	 (aref buf 1)
+	 (aref buf (+ 1 2) (* i j))
+	 (aref bta (+ 3 2) 1 1))
+	
+	 "buf[]
+buf[1]
+buf[(1 + 2)][(i * j)]
+bta[(3 + 2)][1][1]")
 
 
  
