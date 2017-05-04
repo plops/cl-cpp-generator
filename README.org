@@ -303,7 +303,7 @@ all required files upon execution with C-M-x in Slime.  Often it is
 necessary to write into multiple output files. However, writing the
 same content into a file still changes the modification time and
 induces a rebuild in make or ninja. The following function
-write-source hashes the output of each call in *file-hashes* and will not emit code of
+write-source hashes the output of each call in `*file-hashes*` and will not emit code of
 unmodified s-expressions into C source code.
 
 Note: The data in *file-hashes* is not persistent. So if you run this
