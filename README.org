@@ -296,6 +296,146 @@ STATEMENT must be a list. Other objects are illegal within the body.
 
 
 
+** Development with multiple output files
+
+Usually I develop my code emitter in one common lisp progn that writes
+all required files upon execution with C-M-x in Slime.  Often it is
+necessary to write into multiple output files. However, writing the
+same content into a file still changes the modification time and
+induces a rebuild in make or ninja. The following function
+write-source hashes the output of each call in *file-hashes* and will not emit code of
+unmodified s-expressions into C source code.
+
+Note: The data in *file-hashes* is not persistent. So if you run this
+code in a fresh Common Lisp instance all C files will be touched and
+require rebuild. If you want to prevent that store *file-hashes* to
+disk.
+
+#+BEGIN_SRC common-lisp
+(defparameter *file-hashes* (make-hash-table))
+
+(defun write-source (name extension code)
+  (let* ((fn (merge-pathnames (format nil "~a.~a" name extension)
+                              (user-homedir-pathname)))
+         (code-str (emit-cpp
+                    :clear-env t
+                    :code code))
+         (fn-hash (sxhash fn))
+         (code-hash (sxhash code-str)))
+    (multiple-value-bind (old-code-hash exists) (gethash fn-hash *file-hashes*)
+      (when (or (not exists) (/= code-hash old-code-hash))
+        ;; store the sxhash of the c source in the hash table
+        ;; *file-hashes* with the key formed by the sxhash of the full
+        ;; pathname
+        (setf (gethash fn-hash *file-hashes*) code-hash)
+        (with-open-file (s fn
+                           :direction :output
+                           :if-exists :supersede
+                           :if-does-not-exist :create)
+          (write-sequence code-str s))
+        (sb-ext:run-program "/usr/bin/clang-format" (list "-i" (namestring fn)))))))
+
+
+(let ((header `(with-compilation-unit
+                   (include <QGraphicsItemGroup>)
+                 (class CustomItemGridGroup ("public QGraphicsItemGroup")
+                        (access-specifier public)
+                        (function (CustomItemGridGroup ((dx :type int)
+                                                        (dy :type int)
+                                                        (nx :type int)
+                                                        (ny :type int))
+                                                       explicit))
+                        
+                        (access-specifier private)
+                        (decl ((m_dx :type "unsigned int")
+                               (m_dy :type "unsigned int")
+                               (m_nx :type "unsigned int")
+                               (m_ny :type "unsigned int"))))))
+      (code `(with-compilation-unit
+                 (include "CustomItemGridGroup.h")
+               (function ("CustomItemGridGroup::CustomItemGridGroup" ((dx :type int)
+                                                                      (dy :type int)
+                                                                      (nx :type int)
+                                                                      (ny :type int))
+                                                                     nil
+                                                                     :ctor
+                                                                     ((m_dx dx)
+                                                                      (m_dy dy)
+                                                                      (m_nx nx)
+                                                                      (m_ny ny)))
+                         (with-compilation-unit
+                             (raw "// draw grid")
+                           (let ((dx :init m_dx)
+                                 (dy :init m_dy)
+                                 (nx :init m_nx)
+                                 (ny :init m_ny))
+                             (dotimes (i ny)
+                               (let ((x1 :init (* dx i))
+                                     (y1 :init (* dy 0))
+                                     (x2 :init x1)
+                                     (y2 :init (* dy (- ny 1))))
+                                 (funcall this->addToGroup (new (funcall QGraphicsLineItem (funcall QLineF x1 y1 x2 y2))))))
+                             (dotimes (i nx)
+                               (let ((y1 :init (* dy i))
+                                     (x1 :init (* dx 0))
+                                     (y2 :init y1)
+                                     (x2 :init (* dx (- nx 1))))
+                                 (funcall this->addToGroup (new (funcall QGraphicsLineItem (funcall QLineF x1 y1 x2 y2))))))))))))
+  (write-source "CustomItemGridGroup" "h" header)
+  (write-source "CustomItemGridGroup" "cpp" code))
+#+END_SRC
+
+#+BEGIN_SRC c++
+// cpp 
+#include "CustomItemGridGroup.h"
+CustomItemGridGroup::CustomItemGridGroup(int dx, int dy, int nx, int ny)
+    : m_dx(dx), m_dy(dy), m_nx(nx), m_ny(ny) {
+  // draw grid
+  {
+    auto dx = m_dx;
+    auto dy = m_dy;
+    auto nx = m_nx;
+    auto ny = m_ny;
+
+    for (unsigned int i = 0; (i < ny); i += 1) {
+      {
+        auto x1 = (dx * i);
+        auto y1 = (dy * 0);
+        auto x2 = x1;
+        auto y2 = (dy * (ny - 1));
+
+        this->addToGroup(new QGraphicsLineItem(QLineF(x1, y1, x2, y2)));
+      }
+    }
+
+    for (unsigned int i = 0; (i < nx); i += 1) {
+      {
+        auto y1 = (dy * i);
+        auto x1 = (dx * 0);
+        auto y2 = y1;
+        auto x2 = (dx * (nx - 1));
+
+        this->addToGroup(new QGraphicsLineItem(QLineF(x1, y1, x2, y2)));
+      }
+    }
+  }
+}
+
+// header
+#include <QGraphicsItemGroup>
+class CustomItemGridGroup : public QGraphicsItemGroup {
+public:
+  explicit CustomItemGridGroup(int dx, int dy, int nx, int ny);
+
+private:
+  unsigned int m_dx;
+  unsigned int m_dy;
+  unsigned int m_nx;
+  unsigned int m_ny;
+};
+#+END_SRC
+
+
 ** Implementation of tests
 
 In order to verify that the code emitted by emit-cpp is valid I
@@ -444,3 +584,5 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
 - Rust/Haskell/Ada Microcontroller https://news.ycombinator.com/item?id=14071282
 
 - Haskel DSL http://ivorylang.org/
+
+- Lisp flavoured C https://github.com/tomhrr/dale
