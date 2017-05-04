@@ -385,6 +385,9 @@ disk.
   (write-source "CustomItemGridGroup" "cpp" code))
 #+END_SRC
 
+This is how the emitted code in 
+`~/CustomItemGridGroup.cpp` and `~/CustomItemGridGroup.h` looks like:
+
 #+BEGIN_SRC c++
 // cpp 
 #include "CustomItemGridGroup.h"
