@@ -298,17 +298,17 @@ STATEMENT must be a list. Other objects are illegal within the body.
 
 ** Development with multiple output files
 
-Usually I develop my code emitter in one common lisp progn that writes
+Usually, I develop my code emitter in one common lisp progn that writes
 all required files upon execution with C-M-x in Slime.  Often it is
 necessary to write into multiple output files. However, writing the
 same content into a file still changes the modification time and
 induces a rebuild in make or ninja. The following function
-write-source hashes the output of each call in '*file-hashes*' and will not emit code of
+write-source hashes the output of each call in `*file-hashes*` and will not emit code of
 unmodified s-expressions into C source code.
 
-Note: The data in '*file-hashes*' is not persistent. So if you run this
+Note: The data in `*file-hashes*` is not persistent. So if you run this
 code in a fresh Common Lisp instance all C files will be touched and
-require rebuild. If you want to prevent that store '*file-hashes*' to
+require a rebuild. If you want to prevent that store `*file-hashes*` to
 disk.
 
 #+BEGIN_SRC common-lisp
