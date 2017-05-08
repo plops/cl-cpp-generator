@@ -584,6 +584,10 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
 
 - clang tooling https://clang.llvm.org/docs/LibASTMatchersTutorial.html
 
+- clangd https://reviews.llvm.org/rL302191#725d97b4
+
+- language server protocol https://github.com/Microsoft/language-server-protocol
+
 - Rust/Haskell/Ada Microcontroller https://news.ycombinator.com/item?id=14071282
 
 - Haskel DSL http://ivorylang.org/
