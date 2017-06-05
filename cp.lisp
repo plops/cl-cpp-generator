@@ -53,6 +53,29 @@
 
 (setf (readtable-case *readtable*) :invert)
 
+(defparameter *file-hashes* (make-hash-table))
+
+
+(defun write-source (name extension code &optional (dir (user-homedir-pathname)))
+  (let* ((fn (merge-pathnames (format nil "~a.~a" name extension)
+			      dir))
+	(code-str (emit-cpp
+		   :clear-env t
+		   :code code))
+	(fn-hash (sxhash fn))
+	 (code-hash (sxhash code-str)))
+    (multiple-value-bind (old-code-hash exists) (gethash fn-hash *file-hashes*)
+     (when (or (not exists) (/= code-hash old-code-hash))
+       ;; store the sxhash of the c source in the hash table
+       ;; *file-hashes* with the key formed by the sxhash of the full
+       ;; pathname
+       (setf (gethash fn-hash *file-hashes*) code-hash)
+       (with-open-file (s fn
+			  :direction :output
+			  :if-exists :supersede
+			  :if-does-not-exist :create)
+	 (write-sequence code-str s))
+       (sb-ext:run-program "/usr/bin/clang-format" (list "-i" (namestring fn)))))))
 
 ;; OOP A%3A C++-Grammatik (mit Links).html
 (defparameter *special-symbol*
