@@ -84,8 +84,11 @@
   pattern."
   (let* ((ff (coerce f 'single-float))
 	 (s (format nil "~E" ff)))
-   (assert (= 0s0 (- ff
-		     (read-from-string s))))
+    #+nil   (assert (= 0s0 (- ff
+			      (read-from-string s))))
+    (assert (< (abs (- ff
+		       (read-from-string s)))
+	       1d-4))
    (format nil "~af" s)))
 
 #+nil
@@ -97,8 +100,11 @@
   pattern."
   (let* ((ff (coerce f 'double-float))
 	 (s (format nil "~E" ff)))
-   (assert (= 0d0 (- ff
-		     (read-from-string s))))
+    #+nil (assert (= 0d0 (- ff
+			    (read-from-string s))))
+    (assert (< (abs (- ff
+		       (read-from-string s)))
+	       1d-16))
    (substitute #\e #\d s)))
 
 #+nil
