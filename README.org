@@ -593,3 +593,5 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
 - Haskel DSL http://ivorylang.org/
 
 - Lisp flavoured C https://github.com/tomhrr/dale
+
+- Using optima will result in code that is looks much more maintainable http://enthusiasm.cozy.org/archives/2013/07/optima https://github.com/bhyde/backward-parenscript/blob/master/main.lisp#L70

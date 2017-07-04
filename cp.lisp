@@ -53,6 +53,7 @@
 
 (setf (readtable-case *readtable*) :invert)
 
+
 (defparameter *file-hashes* (make-hash-table))
 
 
@@ -75,7 +76,7 @@
 			  :if-exists :supersede
 			  :if-does-not-exist :create)
 	 (write-sequence code-str s))
-       (sb-ext:run-program "/usr/bin/clang-format" (list "-i" (namestring fn)))))))
+      (sb-ext:run-program "/usr/bin/clang-format" (list "-i" (namestring fn)))))))
 
 ;; OOP A%3A C++-Grammatik (mit Links).html
 (defparameter *special-symbol*
@@ -107,8 +108,10 @@
   pattern."
   (let* ((ff (coerce f 'single-float))
 	 (s (format nil "~E" ff)))
-   (assert (= 0s0 (- ff
-		     (read-from-string s))))
+   #+nil (assert (= 0s0 (- ff
+			   (read-from-string s))))
+   (assert (< (abs (- ff
+		      (read-from-string s))) 1e-4))
    (format nil "~af" s)))
 
 #+nil
@@ -120,39 +123,16 @@
   pattern."
   (let* ((ff (coerce f 'double-float))
 	 (s (format nil "~E" ff)))
-   (assert (= 0d0 (- ff
+   #+Nil (assert (= 0d0 (- ff
 		     (read-from-string s))))
+   (assert (< (abs (- ff
+		      (read-from-string s))) 1d-10))
    (substitute #\e #\d s)))
 
 #+nil
 (print-sufficient-digits-f64 1d0)
 
 
-
-(defparameter *file-hashes* (make-hash-table))
-
-
-(defun write-source (name extension code &optional (path (user-homedir-pathname)))
-  "Read s-expressions from code and emit corresponding c++ code into <path>/<name>.<extension>."
-  (let* ((fn (merge-pathnames (format nil "~a.~a" name extension)
-			      path))
-	(code-str (emit-cpp
-		   :clear-env t
-		   :code code))
-	(fn-hash (sxhash fn))
-	 (code-hash (sxhash code-str)))
-    (multiple-value-bind (old-code-hash exists) (gethash fn-hash *file-hashes*)
-     (when (or (not exists) (/= code-hash old-code-hash))
-       ;; store the sxhash of the c source in the hash table
-       ;; *file-hashes* with the key formed by the sxhash of the full
-       ;; pathname
-       (setf (gethash fn-hash *file-hashes*) code-hash)
-       (with-open-file (s fn
-			  :direction :output
-			  :if-exists :supersede
-			  :if-does-not-exist :create)
-	 (write-sequence code-str s))
-       (sb-ext:run-program "/usr/bin/clang-format" (list "-i" (namestring fn)))))))
 
 
 
