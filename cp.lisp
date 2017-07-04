@@ -108,10 +108,11 @@
   pattern."
   (let* ((ff (coerce f 'single-float))
 	 (s (format nil "~E" ff)))
-   #+nil (assert (= 0s0 (- ff
-			   (read-from-string s))))
-   (assert (< (abs (- ff
-		      (read-from-string s))) 1e-4))
+    #+nil   (assert (= 0s0 (- ff
+			      (read-from-string s))))
+    (assert (< (abs (- ff
+		       (read-from-string s)))
+	       1d-4))
    (format nil "~af" s)))
 
 #+nil
@@ -123,10 +124,11 @@
   pattern."
   (let* ((ff (coerce f 'double-float))
 	 (s (format nil "~E" ff)))
-   #+Nil (assert (= 0d0 (- ff
-		     (read-from-string s))))
-   (assert (< (abs (- ff
-		      (read-from-string s))) 1d-10))
+    #+nil (assert (= 0d0 (- ff
+			    (read-from-string s))))
+    (assert (< (abs (- ff
+		       (read-from-string s)))
+	       1d-16))
    (substitute #\e #\d s)))
 
 #+nil
@@ -470,7 +472,9 @@
 	 (list (destructuring-bind (&rest rest) (cdr code)
 		 (format str "{~{~a~^,~}}" (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 	 (comma-list (destructuring-bind (&rest rest) (cdr code)
-		  (format str "~{~a~^,~}" (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
+		       (format str "~{~a~^,~}" (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
+	 (make-instance (destructuring-bind (object &rest rest) (cdr code)
+		  (format str "~a{~{~a~^,~}}" object (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 	 (lisp (eval (cadr code)))
 	 (statement ;; add semicolon
 	  (cond ((member (second code) (append *binary-operator-symbol*

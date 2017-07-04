@@ -5,19 +5,27 @@ This project provides the Common Lisp function ~emit-cpp &key code
 str~. It receives a list of special s-expressions and emits
 corresponding C++ code into a string.
 
-Here are links to some bigger projects that make use of
-cl-cpp-generator. The gen.lisp file contains additional macros and the
-generating function. The output files are in the source/ folder in the
-repository:
+Please look at test.lisp in order to learn how to use these
+s-expressions.
+
+Occasionally, I add small repositories with self-contained example
+programs that use cl-cpp-generator. They all contain a gen.lisp file
+that contains the s-expressions to generates C++ code. Even though the
+C++ code is automatically generated I keep them in the source/ folder
+of the repositories.
 
 
-- Interactive programming example: Open a GLFW window and dlopens a library that emits OpenGL calls. This library source can be modified/recompiled/reloaded while the program keeps running. https://github.com/plops/cl-gen-glfw
+- https://github.com/plops/cl-gen-glfw Interactive programming example: Open a GLFW window and dlopens a library that emits OpenGL calls. This library source can be modified/recompiled/reloaded while the program keeps running. 
 
-- emit C++ code with Intel Threading Building Blocks and Intel ISPC SIMD compiler that computes the mandelbrot set: https://github.com/plops/cl-gen-ispc-mandelbrot
+- https://github.com/plops/cl-gen-ispc-mandelbrot Emit C++ code with Intel Threading Building Blocks and Intel ISPC SIMD compiler that computes the mandelbrot set. 
 
+- https://github.com/plops/cl-gen-opencv Simple example of how to call the C++ image processing library OpenCV. This example shows how to do 2D interpolation. It loads a PNG image and displays a distorted version. 
 
+- https://github.com/plops/cl-gen-cufft Call Nvidia CUFFT library to perform a multi-dimensional Fourier transform on the GPU. The code draws a spherical shell into a 3D volume.
 
+- https://github.com/plops/cl-gen-fft Implementation of a one-dimensional power-of-two Fourier Transform. The algorithm is from Wikipedia. I use Lisp to unroll the C++ code more than it is usually done. I find the function bit_reverse_copy in https://github.com/plops/cl-gen-fft/blob/master/source/main.cpp particularly instructive. 
 
+- https://github.com/plops/cl-gen-qt-thing A small GUI program that uses a QT canvas. When writing this I learned that writing GUIs with QT takes quite some effort. Too much, in my opinion.
 
 ** Installation
 
