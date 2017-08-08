@@ -127,7 +127,7 @@
 			    (read-from-string s))))
     (assert (< (abs (- ff
 		       (read-from-string s)))
-	       1d-16))
+	       1d-12))
    (substitute #\e #\d s)))
 
 #+nil

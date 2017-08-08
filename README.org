@@ -601,3 +601,5 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
 - Haskel DSL http://ivorylang.org/
 
 - Lisp flavoured C https://github.com/tomhrr/dale
+
+- Clojure to C++ compiler http://ferret-lang.org/
