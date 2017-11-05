@@ -577,6 +577,8 @@ http://super.para.media.kyoto-u.ac.jp/%7Etasuku/sc/pub/ppopp09.pdf
 - https://github.com/cbaggers/varjo
 Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?v=XEtlxJsPR40
   
+- https://github.com/ghollisjr/makeres-cpp looks like a quite limited s-expression representation for c++, to speed up dataprocessing
+
 - https://github.com/takagi/cl-cuda
 
 - https://github.com/angavrilov/cl-gpu
