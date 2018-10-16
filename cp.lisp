@@ -471,6 +471,8 @@
 			   (format str "~a, ( 2 * sizeof( ~a ) )" name name)))
 	 (list (destructuring-bind (&rest rest) (cdr code)
 		 (format str "{~{~a~^,~}}" (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
+	 (paren-list (destructuring-bind (&rest rest) (cdr code)
+		 (format str "(~{~a~^,~})" (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 	 (comma-list (destructuring-bind (&rest rest) (cdr code)
 		       (format str "~{~a~^,~}" (mapcar #'(lambda (x) (emit-cpp :code x)) rest))))
 	 (make-instance (destructuring-bind (object &rest rest) (cdr code)
