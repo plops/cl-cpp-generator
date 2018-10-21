@@ -411,8 +411,8 @@
 		     (format str "~a[]" name))))
 	 (aref (destructuring-bind (name &rest rest) (cdr code)
 		 (if rest
-		     (format str "~a~{[~a]~}" name (mapcar #'(lambda (x) (emit-cpp :code x)) rest))
-		     (format str "~a[]" name))))
+		     (format str "~a~{[~a]~}" (emit-cpp :code name) (mapcar #'(lambda (x) (emit-cpp :code x)) rest))
+		     (format str "~a[]" (emit-cpp :code name)))))
 	 (return (format str "return ~a"
 			 (emit-cpp :code (second code))))
 	 (funcall (destructuring-bind (name &rest rest) (cdr code)
@@ -482,10 +482,10 @@
 	  (cond ((member (second code) (append *binary-operator-symbol*
 					       *computed-assignment-operator-symbol*
 					       *logical-operator-symbol*
-					       '(= return funcall raw go break new delete delete[] ? do-while)))
+					       '(= return funcall raw go break new delete delete[] ? do-while slot-value)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for-range while for foreach foreach-unique foreach-tiled foreach-active dotimes compound-statement statements with-compilation-unit tagbody decl setf slot-value lisp case let macroexpand struct class union))
+		((member (second code) '(if for-range while for foreach foreach-unique foreach-tiled foreach-active dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand struct class union))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
@@ -498,7 +498,7 @@
 			    op
 			    (emit-cpp :code operand))))
 		  ((member (car code) *binary-operator-symbol*)
-		   ;; handle binary operators
+ 		   ;; handle binary operators
 		   ;; no semicolon
 		   (with-output-to-string (s)
 		     (format s "(")
