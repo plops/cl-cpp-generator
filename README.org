@@ -613,6 +613,6 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
 
 - https://fennel-lang.org/
 
-
+- https://norvig.com/ltd/doc/tool.html Peter Norvig's Lisp to Dylan translator from 1994 seems to solve a similar problem
   
 
