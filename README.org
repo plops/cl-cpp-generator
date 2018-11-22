@@ -616,3 +616,4 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
 - https://norvig.com/ltd/doc/tool.html Peter Norvig's Lisp to Dylan translator from 1994 seems to solve a similar problem
   
 - https://github.com/ghollisjr/makeres-cpp
+- https://github.com/3b/3bgl-shader
