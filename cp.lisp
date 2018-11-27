@@ -57,6 +57,14 @@
 (defparameter *file-hashes* (make-hash-table))
 
 
+(defun beautify-source (code)
+  (let* ((code-str (emit-cpp
+		   :clear-env t
+		   :code code)))
+    (with-input-from-string (s code-str)
+      (with-output-to-string (o)
+	(sb-ext:run-program "/usr/bin/clang-format" (list "-") :input s :output o :wait t)))))
+
 (defun write-source (name extension code &optional (dir (user-homedir-pathname)))
   (let* ((fn (merge-pathnames (format nil "~a.~a" name extension)
 			      dir))
