@@ -618,3 +618,11 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
 - https://github.com/ghollisjr/makeres-cpp
 - https://github.com/3b/3bgl-shader
 - https://jonathan.protzenko.fr/2019/01/04/behind-the-scenes.html F* Kremlin for verified HTTPS stack
+  - how to handle parens
+  - argument eval order
+  - struct arguments only when small
+  - no recursion (not all c compilers can handle tail call optimization)
+  - dsl to combine multiple source files, static inline
+  - reproducible build of a docker image with the toolchain
+  - some ugly bug with a windows header
+  - clang sanitizer found unaligned pointer dereference
