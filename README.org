@@ -617,3 +617,4 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
   
 - https://github.com/ghollisjr/makeres-cpp
 - https://github.com/3b/3bgl-shader
+- https://jonathan.protzenko.fr/2019/01/04/behind-the-scenes.html F* Kremlin for verified HTTPS stack
