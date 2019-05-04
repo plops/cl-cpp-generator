@@ -365,7 +365,7 @@
 
 	 
 	 (dotimes (destructuring-bind ((var n) &rest body) (cdr code)
-		    (emit-cpp :code `(for ((,var 0 :type "unsigned int") (< ,var ,(emit-cpp :code n)) (+= ,var 1))
+		    (emit-cpp :code `(for ((,var 0 :type int) (< ,var ,(emit-cpp :code n)) (+= ,var 1))
 					  ,@body))))
 	 (if (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
 	       (with-output-to-string (s)
@@ -493,7 +493,7 @@
 					       '(= return funcall raw go break new delete delete[] ? do-while slot-value)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for-range while for foreach foreach-unique foreach-tiled foreach-active dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand struct class union))
+		((member (second code) '(if for-range while for foreach foreach-unique foreach-tiled foreach-active dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand struct class union function))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
