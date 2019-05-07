@@ -23,6 +23,7 @@
   (:export
    #:include
    #:compound-statement
+   #:single-float-to-c-hex-string
    #:statements
    #:tagbody
    #:go
@@ -64,6 +65,15 @@
     (with-input-from-string (s code-str)
       (with-output-to-string (o)
 	(sb-ext:run-program "/usr/bin/clang-format" (list "-") :input s :output o :wait t)))))
+
+(defun single-float-to-c-hex-string (f)
+  (declare (type (single-float 0) f))
+  (multiple-value-bind (a b c) (integer-decode-float f)
+  (let ((significand (ash a 1)))
+    (format nil "0x~x.~xp~d"
+	    (ldb (byte 4 (* 6 4)) significand)
+	    (ldb (byte (* 6 4) 0) significand)
+	   (+ 23 b)))))
 
 (defun write-source (name extension code &optional (dir (user-homedir-pathname)))
   (let* ((fn (merge-pathnames (format nil "~a.~a" name extension)
