@@ -471,7 +471,11 @@
 	 (deref  (destructuring-bind (object) (cdr code)
 		   (format str "(*(~a))" (emit-cpp :code object))))
 	 (hex (destructuring-bind (number) (cdr code)
-		(format str "0x~x" number)))
+		(typecase number
+		  (single-float
+		   (format str "~a" (single-float-to-c-hex-string number)))
+		  (number
+		   (format str "0x~x" number)))))
 	 (char (destructuring-bind (a) (cdr code)
 		 (typecase a
 		   (standard-char (format str "'~a'" a))
