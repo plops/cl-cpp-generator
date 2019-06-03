@@ -617,4 +617,20 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
   
 - https://github.com/ghollisjr/makeres-cpp
 - https://github.com/3b/3bgl-shader
+
 - https://github.com/mvollmer/zollern
+
+- https://jonathan.protzenko.fr/2019/01/04/behind-the-scenes.html F* Kremlin for verified HTTPS stack
+  - how to handle parens
+  - argument eval order
+  - struct arguments only when small
+  - no recursion (not all c compilers can handle tail call optimization)
+  - dsl to combine multiple source files, static inline
+  - reproducible build of a docker image with the toolchain
+  - some ugly bug with a windows header
+  - clang sanitizer found unaligned pointer dereference
+- https://www.youtube.com/watch?v=aiJxkaxMBVE A Pile of Parens - Episode 4 - Optimization Passes
+- https://mpov.timmorgan.org/i-built-a-lisp-compiler/ https://news.ycombinator.com/item?id=19508616
+- https://github.com/ryos36/verilisp/ lisp to verilog
+- https://ftp.belnet.be/mirror/FOSDEM/2015/devroom-network_management_and_sdn/packet_filtering_pflua__CAM_ONLY.mp4 use luajit as compiler
+

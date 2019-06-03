@@ -23,6 +23,7 @@
   (:export
    #:include
    #:compound-statement
+   #:single-float-to-c-hex-string
    #:statements
    #:tagbody
    #:go
@@ -64,6 +65,15 @@
     (with-input-from-string (s code-str)
       (with-output-to-string (o)
 	(sb-ext:run-program "/usr/bin/clang-format" (list "-") :input s :output o :wait t)))))
+
+(defun single-float-to-c-hex-string (f)
+  (declare (type (single-float 0) f))
+  (multiple-value-bind (a b c) (integer-decode-float f)
+  (let ((significand (ash a 1)))
+    (format nil "0x~x.~xp~d"
+	    (ldb (byte 4 (* 6 4)) significand)
+	    (ldb (byte (* 6 4) 0) significand)
+	   (+ 23 b)))))
 
 (defun write-source (name extension code &optional (dir (user-homedir-pathname)))
   (let* ((fn (merge-pathnames (format nil "~a.~a" name extension)
@@ -365,7 +375,7 @@
 
 	 
 	 (dotimes (destructuring-bind ((var n) &rest body) (cdr code)
-		    (emit-cpp :code `(for ((,var 0 :type "unsigned int") (< ,var ,(emit-cpp :code n)) (+= ,var 1))
+		    (emit-cpp :code `(for ((,var 0 :type int) (< ,var ,(emit-cpp :code n)) (+= ,var 1))
 					  ,@body))))
 	 (if (destructuring-bind (condition true-statement &optional false-statement) (cdr code)
 	       (with-output-to-string (s)
@@ -461,7 +471,11 @@
 	 (deref  (destructuring-bind (object) (cdr code)
 		   (format str "(*(~a))" (emit-cpp :code object))))
 	 (hex (destructuring-bind (number) (cdr code)
-		(format str "0x~x" number)))
+		(typecase number
+		  (single-float
+		   (format str "~a" (single-float-to-c-hex-string number)))
+		  (number
+		   (format str "0x~x" number)))))
 	 (char (destructuring-bind (a) (cdr code)
 		 (typecase a
 		   (standard-char (format str "'~a'" a))
@@ -493,7 +507,7 @@
 					       '(= return funcall raw go break new delete delete[] ? do-while slot-value)))
 		 ;; add semicolon to expressions
 		 (format str "~a;" (emit-cpp :code (cdr code))))
-		((member (second code) '(if for-range while for foreach foreach-unique foreach-tiled foreach-active dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand struct class union))
+		((member (second code) '(if for-range while for foreach foreach-unique foreach-tiled foreach-active dotimes compound-statement statements with-compilation-unit tagbody decl setf lisp case let macroexpand struct class union function))
 		 ;; if for, .. don't need semicolon
 		 (emit-cpp :code (cdr code)))
 		(t (format nil "not processable statement: ~a" code))))
