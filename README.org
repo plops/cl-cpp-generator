@@ -634,3 +634,5 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
 - https://github.com/ryos36/verilisp/ lisp to verilog
 - https://ftp.belnet.be/mirror/FOSDEM/2015/devroom-network_management_and_sdn/packet_filtering_pflua__CAM_ONLY.mp4 use luajit as compiler
 
+- https://news.ycombinator.com/item?id=20195740 discussion about this project
+- http://informatimago.com/develop/lisp/com/informatimago/languages/linc/README linc
