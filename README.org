@@ -1,12 +1,41 @@
 * CL-CPP-GENERATOR
   
 ** Introduction
+
+The purpose of this Lisp package is to bring the power of Common Lisp
+macros to C or C++ source code. 
+
 This project provides the Common Lisp function ~emit-cpp &key code
 str~. It receives a list of special s-expressions and emits
 corresponding C++ code into a string.
 
 Please look at test.lisp in order to learn how to use these
 s-expressions.
+
+The semantics of the s-expressions are very close to C or C++. This is
+not a transpiler like parenscript that converts s-expressions to
+javascript or varjo that converts s-expressions to OpenGL shading
+language. This means it is entirely up to you if you generate C or C++
+code. The lisp package knows nothing about the functions you use or
+define, it can't check the validity of your type assignments.
+
+There are two advantage compared to parenscript and varjo.  The
+generated code can be easy to read and you can always fall back to
+dumping a string if you can't figure out how a certain language
+feature should be expressed as s-expressions. In particular I gave up
+very early on writing C++ template types with s-expressions. They are
+just too much of a mess already.
+
+I feel the s-expressions of cl-cpp-generator give me still a lot of
+power to generate lot's of boring, repetetive code.
+
+A tiny bit of 'intelligence' is in the function write-source. This
+function only keeps track of hashes writes code into a C source when
+the contents have changed.
+
+Recently, I experimented with a code generator for Golang (
+https://github.com/plops/cl-golang-generator) that has a bit of
+cleverness to keep track of variable types.
 
 This is the first in a series of code generators.
 
@@ -69,6 +98,25 @@ This is the first in a series of code generators.
   code. They are however so large (>20Mb) that I wonder if writing
   Common Lisp directly wouldn't be the better approach.
 
+I'm not happy with differences that currently exist between the code
+generators.  Currently, a conditional in cl-py-generator code looks
+like this:
+
+#+BEGIN_QUOTE
+(if (< a 0)
+    (do0 (print "bla")))
+#+END_QUOTE
+
+Whereas cl-cpp-generator expects this:
+
+#+BEGIN_QUOTE
+(if (< a 0)
+    (statements (print "bla")))
+#+END_QUOTE
+
+My hope is that eventually all these code generators converge to have
+the same s-expressions with semantics that are as close as possible to
+Common Lisp.
 
 
 Occasionally, I add small repositories with self-contained example
