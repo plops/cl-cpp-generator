@@ -98,6 +98,11 @@ This is the first in a series of code generators.
   code. They are however so large (>20Mb) that I wonder if writing
   Common Lisp directly wouldn't be the better approach.
 
+- https://github.com/plops/cl-kotlin-generator I just started
+  that. The language looks very similar to python or golang but
+  interacting with the android build environment seems to be rather
+  cumbersome.
+
 I'm not happy with differences that currently exist between the code
 generators.  Currently, a conditional in cl-py-generator code looks
 like this:
