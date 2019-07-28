@@ -8,6 +8,69 @@ corresponding C++ code into a string.
 Please look at test.lisp in order to learn how to use these
 s-expressions.
 
+This is the first in a series of code generators.
+
+- https://github.com/plops/cl-cpp-generator I tried this generator
+  with C/C++/ISPC/OpenCL/Cuda. It was my first attempt. The largest
+  project with this is a firmware for a microcontroller. The difficult
+  part is to get placement of semicolons right. I'm not terribly happy
+  with the current solution. People don't like that every function
+  call has to be explicitly stated as such. Initially I thought it
+  would help me to add function parameter completion in emacs. But I
+  never figured out how to do that and in later code generators I
+  simplified the lisp syntax.
+
+- https://github.com/plops/cl-ada-generator (abandoned) I always
+  wanted to have a VHDL code generator and thought that ADA would be a
+  good target to support a similar language. Unfortunately ADA and
+  VHDL have a lot of syntactic constructs which I find difficult to
+  express in Lisp semantics that I can remember. So I stopped working
+  in this direction.
+
+- https://github.com/plops/cl-py-generator At a new job I generated
+  LOTS of python code (75k lines) with this generator. The difficult
+  part was to get indents right. It works really well. I should
+  backport some features from cl-golang-generator: Variable type
+  declaration, when, unless, unitary - and unitary /, logior, logand,
+  incf, decf.
+
+- https://github.com/plops/cl-js-generator I played around with webrtc
+  and webgl in the browser.  I used parenscript before and I really
+  like the way it upholds lisp semantics (every expression returns a
+  value). However, the generated javascript can be difficult to read
+  (and compare to s-expressions). For this project my goal was to have
+  a very minimal mapping from s-expressions to javascript. Turns out
+  converting lisp to javascript is very straightforward.
+
+- https://github.com/plops/cl-wolfram-generator (abandoned) At some
+  point I was able to download a wolfram language license. I think
+  this language is very close to Lisp. I tried some code generation
+  but the free license would only work on one computer which is not
+  how I work.
+
+- https://github.com/plops/cl-yasm-golang (abandoned for now, FIXME I
+  accidentally called this golang and not generator). I was playing
+  with the idea to program bare to the metal with either LLVM IR or
+  amd64 assembly. Some prototyping indicated that this has extra
+  challenges that can't be easily addressed in my
+  'single-function-code-generator' approach. These are distributing
+  variables on registers, memory handling. Also I'm not sure how much
+  or if I could immediatly profit from existing tooling if I dump
+  assembly or machine code.
+
+- https://github.com/plops/cl-golang-generator I used this to learn a
+  bit of Go.  I implemented quite a few examples of the Golang
+  Programming book. In particular I like how straight forward it was
+  to add common lisp type declarations. I'm very happy with how this
+  experiment turned out. Golang is an expressive, simple
+  language. Implementing the code generator was much faster than my C
+  generator (because I don't have to think about
+  semicolons). Distributing the binaries is much easier than Python
+  code. They are however so large (>20Mb) that I wonder if writing
+  Common Lisp directly wouldn't be the better approach.
+
+
+
 Occasionally, I add small repositories with self-contained example
 programs that use cl-cpp-generator. They all contain a gen.lisp file
 that contains the s-expressions to generates C++ code. Even though the
@@ -26,6 +89,19 @@ of the repositories.
 - https://github.com/plops/cl-gen-fft Implementation of a one-dimensional power-of-two Fourier Transform. The algorithm is from Wikipedia. I use Lisp to unroll the C++ code more than it is usually done. I find the function bit_reverse_copy in https://github.com/plops/cl-gen-fft/blob/master/source/main.cpp particularly instructive. 
 
 - https://github.com/plops/cl-gen-qt-thing A small GUI program that uses a QT canvas. When writing this I learned that writing GUIs with QT takes quite some effort. Too much, in my opinion.
+
+- https://github.com/plops/cl-gen-cpp-wasm Spin up a web server in
+  Common Lisp and host a web assembly program that sums up an array of
+  numbers. I deliberately use a very low level approach
+  https://dassur.ma/things/c-to-webassembly/ to learn about web
+  assembly.
+
+- https://github.com/plops/cl-gen-cuda-try Code generators for 1d and
+  2d fast fourier transforms on CPU and CUDA. For CUDA I used Google's
+  free colab GPU instances. I really like how the CPU implementation
+  turned out. I actually understood the algorithm better by looking at
+  the generated code. I'm not happy with the verboseness of CUDA's
+  complex variables. The SIMD version is a nightmare.
 
 ** Installation
 
