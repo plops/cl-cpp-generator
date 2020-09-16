@@ -2,6 +2,9 @@
   
 ** Introduction
 
+Note: This code is obsolete. I work on https://github.com/plops/cl-cpp-generator2 now.
+
+
 The purpose of this Lisp package is to bring the power of Common Lisp
 macros to C or C++ source code. 
 
