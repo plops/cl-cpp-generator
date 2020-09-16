@@ -770,3 +770,5 @@ Baggers: Khronos Meetup Oslo: Lisping on the GPU  https://www.youtube.com/watch?
 - https://news.ycombinator.com/item?id=20195740 discussion about this project
 - http://informatimago.com/develop/lisp/com/informatimago/languages/linc/README linc
 - https://github.com/google/navc index and navigate c code, watches file changes 
+- https://c9x.me/qscm/ blend of scheme and c
+
